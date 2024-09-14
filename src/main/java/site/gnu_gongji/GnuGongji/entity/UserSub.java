@@ -1,0 +1,29 @@
+package site.gnu_gongji.GnuGongji.entity;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Getter
+@Setter
+public class UserSub {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_sub_id")
+    private Long userSubId;
+
+    @Column(name = "department_eng")
+    private String departmentEng;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @OneToMany(mappedBy = "userSub")
+    private List<UserSubDepartment> userSubDepartments = new ArrayList<>();
+}
