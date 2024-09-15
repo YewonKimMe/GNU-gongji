@@ -7,6 +7,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
+@Table(name = "department_nottice_info")
 public class DepartmentNoticeInfo {
 
     @Id
