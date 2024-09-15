@@ -10,6 +10,7 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
+@Table(name = "user_sub")
 public class UserSub {
 
     @Id
@@ -17,8 +18,8 @@ public class UserSub {
     @Column(name = "user_sub_id")
     private Long userSubId;
 
-    @Column(name = "department_eng")
-    private String departmentEng;
+//    @Column(name = "department_eng")
+//    private String departmentEng;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
