@@ -10,7 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
-import site.gnu_gongji.GnuGongji.security.TokenGenerator;
+import site.gnu_gongji.GnuGongji.security.TokenManger;
 import site.gnu_gongji.GnuGongji.security.oauth2.OAuth2AuthorizationRequestCookieRepository;
 import site.gnu_gongji.GnuGongji.security.oauth2.OAuth2Provider;
 import site.gnu_gongji.GnuGongji.security.oauth2.OAuth2UnlinkManager;
@@ -31,7 +31,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     private final OAuth2UnlinkManager oAuth2UnlinkManager;
 
-    private final TokenGenerator tokenGenerator;
+    private final TokenManger tokenManger;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -76,7 +76,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                     oAuth2UserPrincipal.getUserInfo().getAccessToken()
             );
 
-            String accessToken = tokenGenerator.createJwtToken(authentication);
+            String accessToken = tokenManger.createJwtToken(authentication);
             String refreshToken = "TEST_REFRESH";
 
             return UriComponentsBuilder.fromUriString(targetUrl)
@@ -91,13 +91,13 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             // TODO: DB 유저 정보 제거
             // TODO: RefreshToken 제거
             // TODO: unlink
-            oAuth2UnlinkManager.processUnlink(provider, accessToken);
+            oAuth2UnlinkManager.processUnlink(provider, accessToken, oAuth2UserPrincipal);
 
             return UriComponentsBuilder.fromUriString(targetUrl)
                     .build()
                     .toUriString();
         }
-
+        log.debug("login process failed");
         return UriComponentsBuilder.fromUriString(targetUrl)
                 .queryParam("error", "LoginProcessFailed")
                 .build()
