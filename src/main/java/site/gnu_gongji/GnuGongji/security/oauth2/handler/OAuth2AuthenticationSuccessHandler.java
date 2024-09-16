@@ -44,7 +44,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         }
         customClearAuthenticationAttributes(request, response); // 요청 객체에 있는 인증 관련 요소를 제거하고 쿠키도 제거
 
-        // TODO: 이 redirect 가 무엇을 의미하는지 파악해보기
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
 
     }
