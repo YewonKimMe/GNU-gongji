@@ -89,7 +89,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
             // TODO: DB 유저 정보 제거
             // TODO: RefreshToken 제거
-            // TODO: unlink
             oAuth2UnlinkManager.processUnlink(provider, accessToken, oAuth2UserPrincipal);
 
             return UriComponentsBuilder.fromUriString(targetUrl)
