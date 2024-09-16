@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import site.gnu_gongji.GnuGongji.exception.OAuth2UnlinkException;
@@ -25,7 +26,7 @@ public class NaverOAuth2Unlinker implements OAuth2Unlinker {
     private String clientSecret;
 
     @Override
-    public void unlink(String accessToken) {
+    public void unlink(String accessToken, OAuth2User oAuth2User) {
 
         log.info("[NAVER] OAuth2 Unlink Requst, ACCESS_TOKEN={}", accessToken);
 
