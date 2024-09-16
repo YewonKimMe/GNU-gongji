@@ -1,6 +1,7 @@
 package site.gnu_gongji.GnuGongji.security.oauth2;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import site.gnu_gongji.GnuGongji.exception.OAuth2AuthenticationProcessingException;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
@@ -35,6 +37,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         // 엑세스 토큰 획득
         String accessToken = userRequest.getAccessToken().getTokenValue();
+
+        log.debug("registrationId={}, accessToken={}", registrationId, accessToken);
 
         // 등록 정보, 엑세스 토큰 기반으로 OAuth2 제공자 별 UserInfo 가져오기
         OAuth2UserInfo oAuth2UserInfo = OAuth2UserInfoFactory.getOAtu2UserInfo(registrationId, accessToken, oAuth2User.getAttributes());
