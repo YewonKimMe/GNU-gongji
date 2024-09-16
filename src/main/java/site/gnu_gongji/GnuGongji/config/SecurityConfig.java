@@ -10,7 +10,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import site.gnu_gongji.GnuGongji.security.JwtValidatorFilter;
 import site.gnu_gongji.GnuGongji.security.SecurityConst;
 import site.gnu_gongji.GnuGongji.security.oauth2.CustomOAuth2UserService;
 import site.gnu_gongji.GnuGongji.security.oauth2.OAuth2AuthorizationRequestCookieRepository;
@@ -32,6 +34,8 @@ public class SecurityConfig {
 
     private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
 
+    private final JwtValidatorFilter jwtValidatorFilter;
+
     @Value("${mycustom.cors.dev-url}")
     private String devCorsAllowedURL;
 
@@ -47,7 +51,7 @@ public class SecurityConfig {
                 .securityContext(configurer -> configurer
                         .requireExplicitSave(false))
                 .sessionManagement(
-                                session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                                session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .cors(corsConfig -> corsConfig
                                 .configurationSource(
@@ -70,14 +74,15 @@ public class SecurityConfig {
                                 )
                 )
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/api/v1/user/**").hasRole("USER")
+                        .requestMatchers("/api/v1/user/**").authenticated()
                         .requestMatchers("/api/v1/subscribe/**").hasRole("USER")
                         .anyRequest().permitAll())
                 .oauth2Login(configurer -> configurer.
                         authorizationEndpoint(config -> config.authorizationRequestRepository(oAuth2AuthorizationRequestCookieRepository)).
                         userInfoEndpoint(config -> config.userService(customOAuth2UserService))
                         .successHandler(oAuth2AuthenticationSuccessHandler)
-                        .failureHandler(oAuth2AuthenticationFailureHandler));
+                        .failureHandler(oAuth2AuthenticationFailureHandler))
+                .addFilterBefore(jwtValidatorFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
