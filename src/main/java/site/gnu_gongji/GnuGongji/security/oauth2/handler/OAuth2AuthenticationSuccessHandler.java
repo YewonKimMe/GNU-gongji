@@ -11,10 +11,9 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 import site.gnu_gongji.GnuGongji.security.TokenManger;
-import site.gnu_gongji.GnuGongji.security.oauth2.OAuth2AuthorizationRequestCookieRepository;
-import site.gnu_gongji.GnuGongji.security.oauth2.OAuth2Provider;
-import site.gnu_gongji.GnuGongji.security.oauth2.OAuth2UnlinkManager;
-import site.gnu_gongji.GnuGongji.security.oauth2.OAuth2UserPrincipal;
+import site.gnu_gongji.GnuGongji.security.oauth2.*;
+import site.gnu_gongji.GnuGongji.security.oauth2.enums.TokenDurationTime;
+import site.gnu_gongji.GnuGongji.security.oauth2.enums.TokenType;
 import site.gnu_gongji.GnuGongji.tool.CookieUtils;
 
 import java.io.IOException;
@@ -75,13 +74,13 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                     oAuth2UserPrincipal.getUserInfo().getAccessToken()
             );
 
-            String accessToken = tokenManger.createJwtToken(authentication);
-            String refreshToken = "TEST_REFRESH";
+            // 토큰 생성, ROLE 추가
+            String accessToken = tokenManger.createJwtToken(authentication, oAuth2UserPrincipal, TokenType.ACCESS, TokenDurationTime.ACCESS);
+            String refreshToken = tokenManger.createJwtToken(authentication, oAuth2UserPrincipal, TokenType.REFRESH, TokenDurationTime.REFRESH);
 
             return UriComponentsBuilder.fromUriString(targetUrl)
-                    .queryParam("access_token", accessToken)
-                    // TODO: RefreshToken 실제로 바꾸기
-                    .queryParam("refresh_token", refreshToken)
+                    .queryParam("access-token", accessToken)
+                    //.queryParam("refresh_token", refreshToken)
                     .build().toUriString();
         } else if ("unlink".equalsIgnoreCase(mode)) {
             String accessToken = oAuth2UserPrincipal.getUserInfo().getAccessToken();
