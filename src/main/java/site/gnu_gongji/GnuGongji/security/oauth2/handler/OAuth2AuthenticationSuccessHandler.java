@@ -64,41 +64,49 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                     .build().toUriString();
         }
 
-        if ("login".equalsIgnoreCase(mode)) {
-            // TODO: DB Save
-            // TODO: AccessToken publish, RefreshToken publish
-            // TODO: RefreshToken DB Save
-            log.info("email={}, name={}, nickname={}, accessToken={}", oAuth2UserPrincipal.getUserInfo().getEmail(),
-                    oAuth2UserPrincipal.getUserInfo().getName(),
-                    oAuth2UserPrincipal.getUserInfo().getNickname(),
-                    oAuth2UserPrincipal.getUserInfo().getAccessToken()
-            );
+        return switch (mode.toLowerCase()) {
+            case "login" -> {
+                log.info("email={}, name={}, nickname={}, accessToken={}", oAuth2UserPrincipal.getUserInfo().getEmail(),
+                        oAuth2UserPrincipal.getUserInfo().getName(),
+                        oAuth2UserPrincipal.getUserInfo().getNickname(),
+                        oAuth2UserPrincipal.getUserInfo().getAccessToken()
+                );
 
-            // 토큰 생성, ROLE 추가
-            String accessToken = tokenManger.createJwtToken(authentication, oAuth2UserPrincipal, TokenType.ACCESS, TokenDurationTime.ACCESS);
-            String refreshToken = tokenManger.createJwtToken(authentication, oAuth2UserPrincipal, TokenType.REFRESH, TokenDurationTime.REFRESH);
+                // 토큰 생성, ROLE 추가
+                String accessToken = tokenManger.createJwtToken(authentication, oAuth2UserPrincipal, TokenType.ACCESS, TokenDurationTime.ACCESS);
+                String refreshToken = tokenManger.createJwtToken(authentication, oAuth2UserPrincipal, TokenType.REFRESH, TokenDurationTime.REFRESH);
 
-            return UriComponentsBuilder.fromUriString(targetUrl)
-                    .queryParam("access-token", accessToken)
-                    //.queryParam("refresh_token", refreshToken)
-                    .build().toUriString();
-        } else if ("unlink".equalsIgnoreCase(mode)) {
-            String accessToken = oAuth2UserPrincipal.getUserInfo().getAccessToken();
-            OAuth2Provider provider = oAuth2UserPrincipal.getUserInfo().getProvider();
+                // TODO: UserInfo DB Save
 
-            // TODO: DB 유저 정보 제거
-            // TODO: RefreshToken 제거
-            oAuth2UnlinkManager.processUnlink(provider, accessToken, oAuth2UserPrincipal);
+                // TODO: RefreshToken DB Save
 
-            return UriComponentsBuilder.fromUriString(targetUrl)
-                    .build()
-                    .toUriString();
-        }
-        log.debug("login process failed");
-        return UriComponentsBuilder.fromUriString(targetUrl)
-                .queryParam("error", "LoginProcessFailed")
-                .build()
-                .toUriString();
+                yield UriComponentsBuilder.fromUriString(targetUrl)
+                        .queryParam("accessToken", accessToken)
+                        //.queryParam("refresh_token", refreshToken)
+                        .build().toUriString();
+            }
+            case "unlink" -> {
+                String accessToken = oAuth2UserPrincipal.getUserInfo().getAccessToken();
+                OAuth2Provider provider = oAuth2UserPrincipal.getUserInfo().getProvider();
+
+                // TODO: DB 유저 정보 제거
+
+                // TODO: RefreshToken 제거
+                oAuth2UnlinkManager.processUnlink(provider, accessToken, oAuth2UserPrincipal);
+
+                yield UriComponentsBuilder.fromUriString(targetUrl)
+                        .build()
+                        .toUriString();
+            }
+            default -> {
+                log.debug("[OAuth2 Login Failed] mode={}, ", mode);
+
+                yield UriComponentsBuilder.fromUriString(targetUrl)
+                        .queryParam("error", "LoginProcessFailed")
+                        .build()
+                        .toUriString();
+            }
+        };
     }
 
     private OAuth2UserPrincipal getOAuth2UserPrincipal(Authentication authentication) {
