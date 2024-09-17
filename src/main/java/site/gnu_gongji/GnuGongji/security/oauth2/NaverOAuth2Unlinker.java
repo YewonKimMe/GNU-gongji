@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import site.gnu_gongji.GnuGongji.exception.OAuth2UnlinkException;
+import site.gnu_gongji.GnuGongji.security.oauth2.enums.Unlink;
 
 @Slf4j
 @RequiredArgsConstructor
