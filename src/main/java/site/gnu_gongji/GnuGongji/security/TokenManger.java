@@ -1,10 +1,8 @@
 package site.gnu_gongji.GnuGongji.security;
 
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,7 +13,12 @@ import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
+import site.gnu_gongji.GnuGongji.security.oauth2.OAuth2UserPrincipal;
+import site.gnu_gongji.GnuGongji.security.oauth2.enums.Role;
+import site.gnu_gongji.GnuGongji.security.oauth2.enums.TokenDurationTime;
+import site.gnu_gongji.GnuGongji.security.oauth2.enums.TokenType;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -35,12 +38,6 @@ public class TokenManger {
     @Value("${mycustom.jwt.secret}")
     private String jwtSecret;
     private Key key;
-
-    @PostConstruct
-    public void init() {
-        byte[] key = Decoders.BASE64URL.decode(jwtSecret);
-        this.key = Keys.hmacShaKeyFor(key);
-    }
 
     public boolean validateJwtToken(String token) {
         try {
@@ -67,29 +64,45 @@ public class TokenManger {
         return false;
     }
 
-    public String createJwtToken(Authentication authentication) {
+    public String createJwtToken(Authentication authentication, OAuth2User oAuth2User, TokenType tokenType, TokenDurationTime tokenDurationTime) {
 
         OAuth2AuthenticationToken oAuth2AuthenticationToken = null;
+
+        OAuth2UserPrincipal oAuth2UserPrincipal = null;
 
         if (authentication instanceof OAuth2AuthenticationToken) {
             oAuth2AuthenticationToken = (OAuth2AuthenticationToken) authentication;
         }
+        if (oAuth2User instanceof OAuth2UserPrincipal) {
+            oAuth2UserPrincipal = (OAuth2UserPrincipal) oAuth2User;
+        }
+
+        String jwt = getJWT(authentication, oAuth2AuthenticationToken, oAuth2UserPrincipal, tokenType, tokenDurationTime);
+
+        log.debug("oAuth id={}", oAuth2UserPrincipal.getUserInfo().getId());
+        log.debug("provider={}", oAuth2AuthenticationToken!= null ? oAuth2AuthenticationToken.getAuthorizedClientRegistrationId() : null);
+        log.debug("generated jwt = {}", jwt);
+
+        return jwt;
+    }
+
+    private String getJWT(Authentication authentication, OAuth2AuthenticationToken oAuth2AuthenticationToken, OAuth2UserPrincipal oAuth2UserPrincipal, TokenType tokenType, TokenDurationTime tokenDurationTime) {
 
         SecretKey secretKey = getSecretKey(jwtSecret);
 
-        Instant expirationTime = Instant.now().plus(Duration.ofHours(ACCESS_TOKEN_EXPIRE_TIME_IN_TIME));
-        String jwt = Jwts.builder()
+        Instant expirationTime = Instant.now().plus(Duration.ofHours(tokenDurationTime.getTime()));
+
+        return Jwts.builder()
                 .issuer("GNU-GONGJI")
                 .subject(authentication.getName())
                 .expiration(Date.from(expirationTime))
-                .claim("provider", oAuth2AuthenticationToken != null ? oAuth2AuthenticationToken.getAuthorizedClientRegistrationId() : "")
+                .claim("type", tokenType.getTokenName())
+                .claim("provider", oAuth2AuthenticationToken != null ? oAuth2AuthenticationToken.getAuthorizedClientRegistrationId() : null)
+                .claim("id", oAuth2UserPrincipal != null ? oAuth2UserPrincipal.getUserInfo().getId() : null)
                 .claim("username", authentication.getName())
                 .claim("authorities", populateAuthorities(authentication.getAuthorities()))
                 .signWith(secretKey)
                 .compact();
-        log.debug("provider={}", oAuth2AuthenticationToken!= null ? oAuth2AuthenticationToken.getAuthorizedClientRegistrationId() : "None");
-        log.debug("generated jwt = {}", jwt);
-        return jwt;
     }
 
     public Authentication getAuth(String jwtToken) {
@@ -115,6 +128,11 @@ public class TokenManger {
 
     public String populateAuthorities(Collection<? extends GrantedAuthority> collection) {
         Set<String> authoritiesSet = new HashSet<>();
+
+        if (collection.isEmpty()) {
+            return Role.PREFIX.getValue() + Role.USER.getValue();
+        }
+
         for (GrantedAuthority authority : collection) {
             authoritiesSet.add(authority.getAuthority());
         }
