@@ -1,8 +1,7 @@
 package site.gnu_gongji.GnuGongji.security.oauth2;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -49,12 +48,14 @@ public class NaverOAuth2Unlinker implements OAuth2Unlinker {
     }
 
     @Getter
-    @RequiredArgsConstructor
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
     private static class UnlinkResponse {
 
         @JsonProperty("access_token")
-        private final String accessToken;
+        private String accessToken;
 
-        private final String result;
+        private String result;
     }
 }
