@@ -36,5 +36,9 @@ out/
 ### VS Code ###
 .vscode/
 
+# Local Setting
 application.properties
 application.yml
+
+# QueryDSL generated QEntity files
+/src/main/generated/
