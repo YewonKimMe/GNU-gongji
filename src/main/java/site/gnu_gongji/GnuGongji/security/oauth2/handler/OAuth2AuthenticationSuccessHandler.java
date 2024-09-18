@@ -137,10 +137,11 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         oAuth2UnlinkManager.processUnlink(provider, accessToken, oAuth2UserPrincipal);
 
         // DB 유저 정보 제거
-        userManageService.deleteOAuth2User(oAuth2UserPrincipal.getUserInfo().getId(), provider);
+        boolean result = userManageService.deleteOAuth2User(oAuth2UserPrincipal.getUserInfo().getId(), provider);
 
         return UriComponentsBuilder.fromUriString(targetUrl)
                 .queryParam(process, "unlink")
+                .queryParam("userDelete", String.valueOf(result))
                 .queryParam("status", "success")
                 .build()
                 .toUriString();
