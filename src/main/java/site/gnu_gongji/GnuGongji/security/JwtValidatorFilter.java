@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+import site.gnu_gongji.GnuGongji.security.oauth2.enums.TokenType;
 
 import java.io.IOException;
 
@@ -33,7 +34,8 @@ public class JwtValidatorFilter extends OncePerRequestFilter {
             return;
         }
 
-        if (tokenManger.validateJwtToken(jwtToken)) {
+        // JWT 검증
+        if (tokenManger.validateJwtToken(jwtToken, TokenType.ACCESS)) {
             log.debug("JWT Valid={}", jwtToken);
             Authentication authentication = tokenManger.getAuth(jwtToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
