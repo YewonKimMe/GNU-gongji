@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public enum TokenDurationTime {
 
-    ACCESS(3), // 3시간
+    ACCESS(24), // 24시간
 
     REFRESH(1420); // 2개월
 
