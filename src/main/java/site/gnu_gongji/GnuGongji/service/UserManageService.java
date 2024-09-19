@@ -8,7 +8,7 @@ import site.gnu_gongji.GnuGongji.dto.UserCreateDto;
 import site.gnu_gongji.GnuGongji.entity.Authority;
 import site.gnu_gongji.GnuGongji.entity.User;
 import site.gnu_gongji.GnuGongji.repository.UserManageRepository;
-import site.gnu_gongji.GnuGongji.security.oauth2.OAuth2Provider;
+import site.gnu_gongji.GnuGongji.security.oauth2.enums.OAuth2Provider;
 import site.gnu_gongji.GnuGongji.security.oauth2.OAuth2UserPrincipal;
 import site.gnu_gongji.GnuGongji.security.oauth2.enums.Role;
 
@@ -61,7 +61,7 @@ public class UserManageService {
 
     public boolean isUserAlreadyExist(String userEmail) {
 
-        Optional<User> userOptional = userManageRepository.findUser(userEmail);
+        Optional<User> userOptional = userManageRepository.findUserByEmail(userEmail);
 
         return userOptional.isPresent();
     }
@@ -69,5 +69,13 @@ public class UserManageService {
     public boolean deleteOAuth2User(String oauth2Id, OAuth2Provider provider) {
 
         return userManageRepository.deleteUser(oauth2Id, provider.getRegistrationId());
+    }
+
+    public Optional<User> findOAuth2User(String oauth2Id, String oauth2Provider) {
+        return userManageRepository.findUserByOauth2IdAndOAuth2Provider(oauth2Id, oauth2Provider);
+    }
+
+    public boolean updateRefreshToken(String oauth2Id, String oauth2Provider, String newRefreshToken) {
+        return userManageRepository.updateRefreshToke(oauth2Id, oauth2Provider, newRefreshToken);
     }
 }

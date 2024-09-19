@@ -2,6 +2,7 @@ package site.gnu_gongji.GnuGongji.security.oauth2;
 
 import lombok.extern.slf4j.Slf4j;
 import site.gnu_gongji.GnuGongji.exception.OAuth2AuthenticationProcessingException;
+import site.gnu_gongji.GnuGongji.security.oauth2.enums.OAuth2Provider;
 
 import java.util.Map;
 

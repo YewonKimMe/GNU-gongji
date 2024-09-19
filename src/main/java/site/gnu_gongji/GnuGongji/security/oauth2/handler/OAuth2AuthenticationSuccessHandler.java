@@ -16,6 +16,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import site.gnu_gongji.GnuGongji.dto.UserCreateDto;
 import site.gnu_gongji.GnuGongji.security.TokenManger;
 import site.gnu_gongji.GnuGongji.security.oauth2.*;
+import site.gnu_gongji.GnuGongji.security.oauth2.enums.OAuth2Provider;
 import site.gnu_gongji.GnuGongji.security.oauth2.enums.TokenDurationTime;
 import site.gnu_gongji.GnuGongji.security.oauth2.enums.TokenType;
 import site.gnu_gongji.GnuGongji.service.UserManageService;
