@@ -29,12 +29,31 @@ public class UserManageRepositoryImpl implements UserManageRepository {
     }
 
     @Override
-    public Optional<User> findUser(String userEmail) {
+    public Optional<User> findUserByEmail(String userEmail) {
 
         QUser user = QUser.user;
         BooleanBuilder builder = new BooleanBuilder();
 
         builder.and(user.userEmail.eq(userEmail));
+
+        User findUser = queryFactory
+                .select(user)
+                .from(user)
+                .where(builder)
+                .fetchOne();
+
+        return Optional.ofNullable(findUser);
+    }
+
+    @Override
+    public Optional<User> findUserByOauth2IdAndOAuth2Provider(String oauth2Id, String oauth2Provider) {
+
+        QUser user = QUser.user;
+        BooleanBuilder builder = new BooleanBuilder();
+
+        builder.and(user.isOAuth2.isTrue());
+        builder.and(user.oauth2Id.eq(oauth2Id));
+        builder.and(user.oauth2Provider.eq(oauth2Provider));
 
         User findUser = queryFactory
                 .select(user)
@@ -58,5 +77,26 @@ public class UserManageRepositoryImpl implements UserManageRepository {
                 .where(builder)
                 .execute();
         return result > 0;
+    }
+
+    @Override
+    public boolean updateRefreshToke(String oauth2Id, String oauth2Provider, String newRefreshToken) {
+        QUser user = QUser.user;
+        BooleanBuilder builder = new BooleanBuilder();
+
+        builder.and(user.oauth2Id.eq(oauth2Id));
+        builder.and(user.oauth2Provider.eq(oauth2Provider));
+
+        User findUser = queryFactory
+                .select(user)
+                .from(user)
+                .where(builder)
+                .fetchOne();
+        if (null == findUser) {
+            return false;
+        }
+
+        findUser.setRefreshToken(newRefreshToken);
+        return true;
     }
 }
