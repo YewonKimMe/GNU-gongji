@@ -86,9 +86,7 @@ public class TokenManger {
                         username,
                         authorities);
 
-                userManageService.updateRefreshToken(oauth2Id, provider, newRefreshToken);
-                // TODO 새 ACCESS TOKEN 을 클라이언트로 어떻게 반환할건지
-                return true;
+                return userManageService.updateRefreshToken(oauth2Id, provider, newRefreshToken);
             }
 
         } catch (IllegalArgumentException exception) {
@@ -96,7 +94,7 @@ public class TokenManger {
         } catch (Exception exception) {
             log.error("JWT validation fails", exception);
         }
-        return false;
+        return false; // SecurityContext.clearContext() -> Exception(501 response)
     }
 
     private boolean checkRefreshToken(String invalidAccessJwt, String jwtSecret) {
