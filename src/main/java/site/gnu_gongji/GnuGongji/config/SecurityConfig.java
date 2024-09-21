@@ -10,8 +10,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import site.gnu_gongji.GnuGongji.security.CustomAuthenticationEntryPoint;
 import site.gnu_gongji.GnuGongji.security.JwtValidatorFilter;
 import site.gnu_gongji.GnuGongji.security.SecurityConst;
 import site.gnu_gongji.GnuGongji.security.oauth2.CustomOAuth2UserService;
@@ -36,6 +37,8 @@ public class SecurityConfig {
 
     private final JwtValidatorFilter jwtValidatorFilter;
 
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+
     @Value("${mycustom.cors.dev-url}")
     private String devCorsAllowedURL;
 
@@ -56,33 +59,35 @@ public class SecurityConfig {
                 .cors(corsConfig -> corsConfig
                                 .configurationSource(
                                         request -> {
+                                            CorsConfiguration config = new CorsConfiguration();
 
-                                            CorsConfiguration corsConfig1 = new CorsConfiguration();
+                                            config.setAllowedHeaders(Collections.singletonList("*"));
+                                            config.setExposedHeaders(List.of(SecurityConst.AUTH_HEADER.getValue()));
+                                            config.setAllowedMethods(Collections.singletonList("*"));
+                                            config.setMaxAge(3600L); // preflight request cache 유효 시간
+                                            config.setAllowCredentials(true); // cors 요청에서 자격 증명 전송 허용
 
-                                            corsConfig1.setAllowedHeaders(Collections.singletonList("*"));
-                                            corsConfig1.setExposedHeaders(List.of(SecurityConst.AUTH_HEADER.getValue()));
-                                            corsConfig1.setAllowedMethods(Collections.singletonList("*"));
-                                            corsConfig1.setMaxAge(3600L); // preflight request cache 유효 시간
-                                            corsConfig1.setAllowCredentials(true); // cors 요청에서 자격 증명 전송 허용
-
-                                            corsConfig1.setAllowedOrigins(List.of(
+                                            config.setAllowedOrigins(List.of(
                                                     devCorsAllowedURL,
                                                     prodCorsAllowedURL
                                             ));
-                                            return corsConfig1;
+                                            return config;
                                         }
                                 )
                 )
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/api/v1/user/**").authenticated()
+                        .requestMatchers("/api/v1/user/**").hasRole("USER")
                         .requestMatchers("/api/v1/subscribe/**").hasRole("USER")
-                        .anyRequest().permitAll())
+                        .requestMatchers("/api/v1/**").permitAll()
+                        .anyRequest().denyAll())
                 .oauth2Login(configurer -> configurer.
                         authorizationEndpoint(config -> config.authorizationRequestRepository(oAuth2AuthorizationRequestCookieRepository)).
                         userInfoEndpoint(config -> config.userService(customOAuth2UserService))
                         .successHandler(oAuth2AuthenticationSuccessHandler)
                         .failureHandler(oAuth2AuthenticationFailureHandler))
-                .addFilterBefore(jwtValidatorFilter, UsernamePasswordAuthenticationFilter.class);
+                .exceptionHandling(exceptionHandlingConfigurer -> exceptionHandlingConfigurer
+                        .authenticationEntryPoint(authenticationEntryPoint))
+                .addFilterBefore(jwtValidatorFilter, BasicAuthenticationFilter.class);
         return http.build();
     }
 
