@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -34,12 +35,16 @@ public class JwtValidatorFilter extends OncePerRequestFilter {
             return;
         }
 
-        // JWT 검증
-        if (tokenManger.validateJwtToken(jwtToken, TokenType.ACCESS)) {
+        if (tokenManger.validateJwtToken(jwtToken, TokenType.ACCESS)) { // JWT 검증
             log.debug("JWT Valid={}", jwtToken);
             Authentication authentication = tokenManger.getAuth(jwtToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
+        } else { // SecurityContextHolder clear, AuthenticationException entrypoint catch, client 는 인증정보 제거
+            SecurityContextHolder.clearContext();
+            request.setAttribute("BadCdEx", new BadCredentialsException("잘못된 인증 토큰입니다."));
+            //throw new BadCredentialsException("잘못된 인증 토큰입니다.");
         }
+
         filterChain.doFilter(request, response);
     }
 
