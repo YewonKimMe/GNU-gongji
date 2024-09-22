@@ -21,4 +21,12 @@ public class ExceptionAdvice {
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(new FailResultAndMessage(HttpStatus.UNAUTHORIZED.getReasonPhrase(), e.getMessage()));
     }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ResultAndMessage> handleException(Exception e) {
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new FailResultAndMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), "unknown error"));
+    }
 }
