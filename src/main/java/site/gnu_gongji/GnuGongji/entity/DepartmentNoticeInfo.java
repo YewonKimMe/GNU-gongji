@@ -3,10 +3,12 @@ package site.gnu_gongji.GnuGongji.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Getter
 @Setter
+@ToString
 @Table(name = "department_nottice_info")
 public class DepartmentNoticeInfo {
 
