@@ -14,9 +14,7 @@ import site.gnu_gongji.GnuGongji.exception.ExcelFileAdditionException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -49,37 +47,47 @@ public class NoticeExcelParser {
                 }
                 Row row = sheet.getRow(r); // 행 획득
                 int numberOfColumns = row.getLastCellNum();
-                log.debug("columns={}", numberOfColumns);
+                //log.debug("columns={}", numberOfColumns);
                 if (numberOfColumns != 5) {
                     throw new IllegalArgumentException("잘못된 양식의 엑셀 파일 입니다. column: " + numberOfColumns);
                 }
                 DepartmentNoticeInfo deptNoticeInfo = new DepartmentNoticeInfo();
                 deptNoticeInfo.setLastNttSn(0);
 
-                for (int c=0; c<numberOfColumns; c++) {
-                    log.debug("c number={}", c);
+                for (int c=0; c<numberOfColumns + 1; c++) {
+                    //log.debug("c number={}", c);
 
                     Cell cell = row.getCell(c); // 셀 획득
                     if (cell == null) continue;
 
                     String cellValue = cell.toString();
-
+                    boolean isNumber = false;
                     if (cell.getCellType() == CellType.NUMERIC) { // 숫자 형식일 경우 정수로 변환
                         cellValue = String.valueOf((int) cell.getNumericCellValue());
+                        isNumber = true;
                     }
-                    if (c == 0 && !map.containsKey(cellValue)) { // 0번째 셀(부서명) 이면서 키가 없다면
-                        if (!map.isEmpty()) {
+                    if (c == 0 && !isNumber && !map.containsKey(cellValue)) { // 0번째 셀(부서명) 이면서 키가 없다면
+                        if (!map.isEmpty()) { //
+                            log.debug(deptNoticeInfo.toString());
+                            log.debug(map.get(beforeDpName).toString());
+                            List<DepartmentNoticeInfo> departmentNoticeInfoList = map.get(beforeDpName).getDepartmentNoticeInfoList();
+
+                            departmentNoticeInfoList.remove(departmentNoticeInfoList.size() - 1);
+                            // TODO 연관관계 설정, 저장
                             map.remove(beforeDpName);
+                        } else if (cellValue.equals("end")){
+                            log.debug("cellValue={}", cellValue);
+                            return;
                         }
                         Department dp = new Department();
-                        dp.setDepartmentNoticeInfoList(new LinkedList<>());
+                        dp.setDepartmentNoticeInfoList(new ArrayList<>());
                         map.put(cellValue, dp);
                         beforeDpName = cellValue;
                     }
                     if (!StringUtils.hasText(cellValue) && c == 0) { // 값이 없으면서 0번째 셀이면 넘어가기
                         continue;
                     }
-                    log.debug("cellValue={}",cellValue);
+                    //log.debug("cellValue={}",cellValue);
 
                     switch (c) {
                         // 학과명(ko) -> department 에 세팅
@@ -101,10 +109,7 @@ public class NoticeExcelParser {
                     }
                 }
                 map.get(beforeDpName).getDepartmentNoticeInfoList().add(deptNoticeInfo);
-                log.debug(deptNoticeInfo.toString());
-                log.debug(map.get(beforeDpName).toString());
 
-                // 저장
             }
         } catch (FileNotFoundException e) {
             log.debug("File 을 찾을 수 없음");
