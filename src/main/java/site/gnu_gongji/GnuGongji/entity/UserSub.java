@@ -3,6 +3,7 @@ package site.gnu_gongji.GnuGongji.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
+@ToString
 @Table(name = "user_sub")
 public class UserSub {
 
@@ -25,6 +27,6 @@ public class UserSub {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "userSub")
-    private List<UserSubDepartment> userSubDepartments = new ArrayList<>();
+//    @OneToMany(mappedBy = "userSub")
+//    private List<UserSubDepartment> userSubDepartments = new ArrayList<>();
 }
