@@ -75,7 +75,8 @@ public class NoticeExcelParser {
                             departmentNoticeInfoList.remove(departmentNoticeInfoList.size() - 1);
                             // TODO 연관관계 설정, 저장
                             map.remove(beforeDpName);
-                        } else if (cellValue.equals("end")){
+                        }
+                        if (cellValue.equals("end")){
                             log.debug("cellValue={}", cellValue);
                             return;
                         }
