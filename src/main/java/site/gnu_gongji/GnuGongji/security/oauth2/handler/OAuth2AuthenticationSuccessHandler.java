@@ -75,6 +75,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         OAuth2UserPrincipal oAuth2UserPrincipal = getOAuth2UserPrincipal(authentication);
 
+        log.debug("redirectUri={}, targetUrl={}, mode={}", redirectUri, targetUrl, mode);
 
         if (null == oAuth2UserPrincipal) {
             return UriComponentsBuilder.fromUriString(targetUrl)
@@ -143,7 +144,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         return UriComponentsBuilder.fromUriString(targetUrl)
                 .queryParam(process, "unlink")
                 .queryParam("userDelete", String.valueOf(result))
-                .queryParam("status", "success")
+                .queryParam("status", result ? "success" : "fail")
                 .build()
                 .toUriString();
     }
