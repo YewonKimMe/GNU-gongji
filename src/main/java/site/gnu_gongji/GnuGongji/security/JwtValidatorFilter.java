@@ -55,7 +55,7 @@ public class JwtValidatorFilter extends OncePerRequestFilter {
 
         AntPathMatcher pathMatcher = new AntPathMatcher();
 
-        return pathMatcher.match("/api/v1/oauth2/**", servletPath);
+        return !pathMatcher.match("/api/v1/**", servletPath);
     }
 
     private String getBearerToken(HttpServletRequest request) {
