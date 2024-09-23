@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import site.gnu_gongji.GnuGongji.entity.Department;
 
+import java.util.List;
+
 @Slf4j
 @Repository
 public class DepartmentRepositoryImpl implements DepartmentRepository {
@@ -30,5 +32,12 @@ public class DepartmentRepositoryImpl implements DepartmentRepository {
         String jpql = "SELECT COUNT(e) FROM Department e";
         Long count = em.createQuery(jpql, Long.class).getSingleResult();
         return count > 0;
+    }
+
+    @Override
+    public List<Department> getAllDepartmentNoticeInfo() {
+
+        return em.createQuery("SELECT d FROM Department d", Department.class)
+                .getResultList();
     }
 }

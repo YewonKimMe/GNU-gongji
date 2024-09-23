@@ -5,8 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.gnu_gongji.GnuGongji.entity.Department;
-import site.gnu_gongji.GnuGongji.entity.DepartmentNoticeInfo;
 import site.gnu_gongji.GnuGongji.repository.DepartmentRepository;
+
+import java.util.List;
 
 @Transactional
 @RequiredArgsConstructor
@@ -23,5 +24,9 @@ public class DepartmentService {
 
     public boolean checkDepartmentExist() {
         return departmentRepository.checkDepartmentExist();
+    }
+
+    public List<Department> getAllDepartmentNoticeInfo() {
+        return departmentRepository.getAllDepartmentNoticeInfo();
     }
 }
