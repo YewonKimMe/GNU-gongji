@@ -1,5 +1,6 @@
 package site.gnu_gongji.GnuGongji.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,5 +31,6 @@ public class Department {
 //    private List<UserSubDepartment> userSubDepartmentList = new ArrayList<>();
 
     @OneToMany(mappedBy = "department", cascade = CascadeType.PERSIST)
+    @JsonManagedReference
     private List<DepartmentNoticeInfo> departmentNoticeInfoList = new ArrayList<>();
 }
