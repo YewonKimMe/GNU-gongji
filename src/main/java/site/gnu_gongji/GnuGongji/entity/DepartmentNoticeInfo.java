@@ -8,8 +8,8 @@ import lombok.ToString;
 @Entity
 @Getter
 @Setter
-@ToString
-@Table(name = "department_nottice_info")
+@ToString(exclude = "department")
+@Table(name = "department_notice_info")
 public class DepartmentNoticeInfo {
 
     @Id
