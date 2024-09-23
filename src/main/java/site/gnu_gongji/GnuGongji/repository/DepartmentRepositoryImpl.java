@@ -37,7 +37,7 @@ public class DepartmentRepositoryImpl implements DepartmentRepository {
     @Override
     public List<Department> getAllDepartmentNoticeInfo() {
 
-        return em.createQuery("SELECT d FROM Department d", Department.class)
+        return em.createQuery("SELECT d FROM Department d JOIN FETCH d.departmentNoticeInfoList", Department.class)
                 .getResultList();
     }
 }
