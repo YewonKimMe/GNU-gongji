@@ -29,6 +29,6 @@ public class Department {
 //    @OneToMany(mappedBy = "department")
 //    private List<UserSubDepartment> userSubDepartmentList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "department")
+    @OneToMany(mappedBy = "department", cascade = CascadeType.PERSIST)
     private List<DepartmentNoticeInfo> departmentNoticeInfoList = new ArrayList<>();
 }

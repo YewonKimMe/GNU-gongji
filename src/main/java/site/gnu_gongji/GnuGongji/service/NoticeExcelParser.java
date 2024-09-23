@@ -67,13 +67,16 @@ public class NoticeExcelParser {
                         isNumber = true;
                     }
                     if (c == 0 && !isNumber && !map.containsKey(cellValue)) { // 0번째 셀(부서명) 이면서 키가 없다면
-                        if (!map.isEmpty()) { //
-                            log.debug(deptNoticeInfo.toString());
-                            log.debug(map.get(beforeDpName).toString());
+                        if (!map.isEmpty()) { // 맵이 비어있지 않다면
                             List<DepartmentNoticeInfo> departmentNoticeInfoList = map.get(beforeDpName).getDepartmentNoticeInfoList();
 
-                            departmentNoticeInfoList.remove(departmentNoticeInfoList.size() - 1);
+                            //departmentNoticeInfoList.remove(departmentNoticeInfoList.size() - 1);
+                            //log.debug("[DP_INFO]={}", deptNoticeInfo);
+
                             // TODO 연관관계 설정, 저장
+
+                            log.debug("[DP]={}", map.get(beforeDpName));
+                            departmentService.saveDepartmentComb(map.get(beforeDpName));
                             map.remove(beforeDpName);
                         }
                         if (cellValue.equals("end")){
@@ -109,6 +112,7 @@ public class NoticeExcelParser {
                         default -> throw new RuntimeException("올바르지 않은 셀 번호");
                     }
                 }
+                deptNoticeInfo.setDepartment(map.get(beforeDpName));
                 map.get(beforeDpName).getDepartmentNoticeInfoList().add(deptNoticeInfo);
 
             }
