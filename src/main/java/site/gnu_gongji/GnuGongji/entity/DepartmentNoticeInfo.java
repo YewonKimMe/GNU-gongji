@@ -1,5 +1,6 @@
 package site.gnu_gongji.GnuGongji.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,5 +29,6 @@ public class DepartmentNoticeInfo {
 
     @ManyToOne
     @JoinColumn(name = "department_id")
+    @JsonBackReference
     private Department department;
 }
