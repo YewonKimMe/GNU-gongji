@@ -10,5 +10,7 @@ public interface DepartmentRepository {
 
     boolean checkDepartmentExist();
 
+    boolean checkDepartmentByDId(Long departmentId);
+
     List<Department> getAllDepartmentNoticeInfo();
 }

@@ -35,6 +35,15 @@ public class DepartmentRepositoryImpl implements DepartmentRepository {
     }
 
     @Override
+    public boolean checkDepartmentByDId(final Long departmentId) {
+
+        String jpql = "SELECT COUNT(e) FROM Department e WHERE e.departmentId = :departmentId";
+        Long count = em.createQuery(jpql, Long.class)
+                .setParameter("departmentId", departmentId).getSingleResult();
+        return count > 0;
+    }
+
+    @Override
     public List<Department> getAllDepartmentNoticeInfo() {
 
         return em.createQuery("SELECT d FROM Department d JOIN FETCH d.departmentNoticeInfoList", Department.class)
