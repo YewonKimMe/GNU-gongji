@@ -27,6 +27,9 @@ public class UserSub {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Column(name = "departmentId")
+    private Long departmentId;
+
 //    @OneToMany(mappedBy = "userSub")
 //    private List<UserSubDepartment> userSubDepartments = new ArrayList<>();
 }
