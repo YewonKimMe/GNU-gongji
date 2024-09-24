@@ -29,4 +29,8 @@ public class DepartmentService {
     public List<Department> getAllDepartmentNoticeInfo() {
         return departmentRepository.getAllDepartmentNoticeInfo();
     }
+
+    public boolean checkDepartmentExistByDId(Long departmentId) {
+        return departmentRepository.checkDepartmentByDId(departmentId);
+    }
 }
