@@ -6,6 +6,7 @@ import io.jsonwebtoken.security.SignatureException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -174,14 +175,17 @@ public class TokenManger {
 
         Instant expirationTime = Instant.now().plus(Duration.ofHours(tokenDurationTime.getTime()));
 
+        if (oAuth2UserPrincipal == null || oAuth2AuthenticationToken == null) {
+            throw new BadCredentialsException("OAuth2 인증 정보가 없습니다.");
+        }
         return Jwts.builder()
                 .issuer(ISSUER.getClaimKey())
                 .subject(authentication.getName())
                 .expiration(Date.from(expirationTime))
                 .claim(TYPE.getClaimKey(), tokenType.getTokenName())
-                .claim(PROVIDER.getClaimKey(), oAuth2AuthenticationToken != null ? oAuth2AuthenticationToken.getAuthorizedClientRegistrationId() : null)
-                .claim(OAUTH2_ID.getClaimKey(), oAuth2UserPrincipal != null ? oAuth2UserPrincipal.getUserInfo().getId() : null)
-                .claim(USERNAME.getClaimKey(), authentication.getName())
+                .claim(PROVIDER.getClaimKey(), oAuth2AuthenticationToken.getAuthorizedClientRegistrationId())
+                .claim(OAUTH2_ID.getClaimKey(), oAuth2UserPrincipal.getUserInfo().getId())
+                .claim(USERNAME.getClaimKey(), oAuth2UserPrincipal.getUserInfo().getId())
                 .claim(AUTHORITIES.getClaimKey(), populateAuthorities(authentication.getAuthorities()))
                 .signWith(secretKey)
                 .compact();
