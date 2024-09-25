@@ -30,33 +30,40 @@ public class ScrapService {
 
     private final DepartmentService departmentService;
 
+    // TODO 스크랩 결과 저장 자료구조 추가
+
     // scrap, 요청 관계 없이 스케줄링으로 처리
     @Scheduled(cron = "0 0 9-23 * * ?")
     public void scrap() {
 
         String baseUrl = "https://www.gnu.ac.kr/%s/na/ntt/";
 
+        // 모든 Department 와 DepartmentNoticeInfo (세부 정보) 획득
         List<Department> allDptList = departmentService.getAllDepartmentNoticeInfo();
+
+        // 모든 Department 에 대해서 반복작업 수행
         for (Department department : allDptList) {
             List<DepartmentNoticeInfo> departmentNoticeInfoList = department.getDepartmentNoticeInfoList();
-            String departmentKo = department.getDepartmentKo();
+            String departmentKo = department.getDepartmentKo(); // 부서 이름
             String formattedBaseUrl = String.format(baseUrl, department.getDepartmentEng());
-            //log.debug("[formattedBaseUrl]={}", formattedBaseUrl);
 
             // formattedBaseUrl, mi, bbsid = 1 + 3
             String baseNoticeUrl = "%sselectNttList.do?mi=%s&bbsId=%s";
+
             // formattedBaseUrl, mi, bbsid, nttsn = 1 + 4
             String baseNoticeLinkUrl = "%sselectNttInfo.do?mi=%s&bbsId=%s&nttSn=%s";
+
+            // 부서 별 다수 공지사항 링크가 존재
             for (DepartmentNoticeInfo departmentNoticeInfo : departmentNoticeInfoList) {
 
                 List<Integer> nttSnList = new ArrayList<>();
 
-                // 공지사항 접속링크
-                int mi = departmentNoticeInfo.getMi();
-                int bbsId = departmentNoticeInfo.getBbsId();
+                int mi = departmentNoticeInfo.getMi(); // 공지사항 접속 링크 - queryParam: mi
+                int bbsId = departmentNoticeInfo.getBbsId(); // 공지사항 접속 링크 - queryParam: bbs_id
                 String formattedNoticeUrl = String.format(baseNoticeUrl, formattedBaseUrl, mi, bbsId);
                 log.debug("[{}]={}", departmentKo, formattedNoticeUrl);
-                try {
+
+                try { // Jsoup
                     Document document = Jsoup.connect(formattedNoticeUrl).get();
                     Element thead = document.selectFirst("thead");
                     Element tbody = document.selectFirst("tbody");
@@ -71,15 +78,14 @@ public class ScrapService {
                     }
                     // 날짜 인덱스
                     int dateIdx = -1;
-                    for (int i=0; i<noticeHeaders.size(); i++) {
+                    for (int i=0; i<noticeHeaders.size(); i++) { // 등록일 탐색
                         String headerText = noticeHeaders.get(i).text().trim();
                         if (headerText.equals("등록일")) {
                             dateIdx = i;
                             break;
                         }
                     }
-                    log.debug("dateIdx={}", dateIdx);
-                    // log.debug("newNoticeHtmls={}", newNoticeHtmls.toString());
+
                     // 각 공지 링크 가져오기
                     for (Element newNoticeHtml : newNoticeHtmls) {
                         Element element = newNoticeHtml.selectFirst("a.nttInfoBtn");
@@ -102,13 +108,14 @@ public class ScrapService {
                         String formattedNoticeLinkUrl = String.format(baseNoticeLinkUrl, formattedBaseUrl, mi, bbsId, nttSn);
                         log.debug("[{} {}]={}", title, date, formattedNoticeLinkUrl);
 
-                        nttSnList.add(Integer.parseInt(nttSn));
-                        // TODO 알림 발송
+                        nttSnList.add(Integer.parseInt(nttSn)); // nttSn 저장
                     }
                     nttSnList.sort(Collections.reverseOrder()); // lastNttSn 저장
-                    if (!nttSnList.isEmpty()) { // 공지사항이 스크랩된 경우
+                    if (!nttSnList.isEmpty()) { // 공지사항이 스크랩된 경우 == List 가 비어있지 않은 경우
                         departmentNoticeInfo.setLastNttSn(nttSnList.get(0));
                     }
+
+                    // TODO 알림 발송
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
