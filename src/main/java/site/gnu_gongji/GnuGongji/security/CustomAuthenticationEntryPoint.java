@@ -35,7 +35,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("utf-8");
 
-        ResultAndMessage<String> data = new FailResultAndMessage<>(HttpStatus.UNAUTHORIZED.getReasonPhrase(), "Authentication Failed.");
+        ResultAndMessage<String> data = new FailResultAndMessage<>(HttpStatus.UNAUTHORIZED.getReasonPhrase(), "인증 정보가 올바르지 않습니다.");
         String responseData = objectMapper.writeValueAsString(data);
         response.getWriter().write(responseData);
 //        resolver.resolveException(request, response, null, (BadCredentialsException) request.getAttribute("BadCdEx"));
