@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import site.gnu_gongji.GnuGongji.dto.UserCreateDto;
 import site.gnu_gongji.GnuGongji.entity.Authority;
 import site.gnu_gongji.GnuGongji.entity.User;
+import site.gnu_gongji.GnuGongji.exception.UserNotExistException;
 import site.gnu_gongji.GnuGongji.repository.UserManageRepository;
 import site.gnu_gongji.GnuGongji.security.oauth2.enums.OAuth2Provider;
 import site.gnu_gongji.GnuGongji.security.oauth2.OAuth2UserPrincipal;
@@ -14,6 +15,7 @@ import site.gnu_gongji.GnuGongji.security.oauth2.enums.Role;
 
 import java.sql.Timestamp;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 
 @Transactional
@@ -77,5 +79,11 @@ public class UserManageService {
 
     public boolean updateRefreshToken(String oauth2Id, String oauth2Provider, String newRefreshToken) {
         return userManageRepository.updateRefreshToke(oauth2Id, oauth2Provider, newRefreshToken);
+    }
+
+    public List<User> findUsersWithActiveSubscriptionsAndNotifications() {
+
+        return userManageRepository.findUsersWithActiveSubscriptionsAndNotifications()
+                .orElseThrow(() -> new UserNotExistException("구독, 알림 설정중인 유저가 없습니다."));
     }
 }
