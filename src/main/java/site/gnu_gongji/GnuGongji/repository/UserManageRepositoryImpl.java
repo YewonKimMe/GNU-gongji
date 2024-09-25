@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import site.gnu_gongji.GnuGongji.entity.QUser;
 import site.gnu_gongji.GnuGongji.entity.User;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -92,11 +93,20 @@ public class UserManageRepositoryImpl implements UserManageRepository {
                 .from(user)
                 .where(builder)
                 .fetchOne();
+        log.debug("User={}", user);
         if (null == findUser) {
             return false;
         }
 
         findUser.setRefreshToken(newRefreshToken);
         return true;
+    }
+
+    @Override
+    public Optional<List<User>> findUsersWithActiveSubscriptionsAndNotifications() {
+        // TODO userSub, userToken 이 존재하는 유저만 가져오도록 수정
+        List<User> resultList = em.createQuery("SELECT u FROM User u JOIN FETCH u.subList WHERE u.subList IS NOT EMPTY")
+                .getResultList();
+        return resultList.isEmpty() ? Optional.empty() : Optional.of(resultList);
     }
 }
