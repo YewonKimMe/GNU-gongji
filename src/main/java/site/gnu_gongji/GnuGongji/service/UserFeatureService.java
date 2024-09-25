@@ -7,10 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import site.gnu_gongji.GnuGongji.dto.EmailDto;
 import site.gnu_gongji.GnuGongji.entity.User;
 import site.gnu_gongji.GnuGongji.entity.UserSub;
-import site.gnu_gongji.GnuGongji.exception.DepartmentNotExistException;
-import site.gnu_gongji.GnuGongji.exception.NotExistKeyException;
-import site.gnu_gongji.GnuGongji.exception.SubscriptionLimitReachedException;
-import site.gnu_gongji.GnuGongji.exception.UserNotExistException;
+import site.gnu_gongji.GnuGongji.exception.*;
 import site.gnu_gongji.GnuGongji.repository.UserFeatureRepository;
 
 import java.util.Optional;
@@ -54,6 +51,15 @@ public class UserFeatureService {
         if (userSubSize >= 3) {
             throw new SubscriptionLimitReachedException("공지사항 구독은 최대 2개 까지만 가능합니다.\n현재 구독중인 갯수는 " + userSubSize + " 입니다.");
         }
+
+        // userSub 에 해당 deptId 존재 여부 체크(중복 방지)
+        findUser.getSubList()
+                .stream()
+                .filter(userSub -> userSub.getDepartmentId().equals(departmentId))
+                .findFirst()
+                .ifPresent(sub -> {throw new DuplicateSubscribeException("중복된 구독입니다.");
+                });
+
         UserSub userSub = new UserSub();
 
         userSub.setDepartmentId(departmentId);
