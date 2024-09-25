@@ -11,7 +11,7 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@ToString
+@ToString(exclude = "user")
 @Table(name = "user_sub")
 public class UserSub {
 
