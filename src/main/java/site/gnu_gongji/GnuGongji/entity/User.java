@@ -13,6 +13,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Builder
+@ToString(exclude = "authorities")
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "user")
