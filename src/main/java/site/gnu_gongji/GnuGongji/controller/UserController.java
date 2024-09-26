@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import site.gnu_gongji.GnuGongji.dto.EmailDto;
+import site.gnu_gongji.GnuGongji.dto.UserSubDto;
 import site.gnu_gongji.GnuGongji.dto.response.ResultAndMessage;
 import site.gnu_gongji.GnuGongji.dto.response.SuccessResultAndMessage;
 import site.gnu_gongji.GnuGongji.service.UserFeatureService;
@@ -46,10 +47,10 @@ public class UserController {
 
     // 유저 구독 등록
     @PostMapping("/notice-subscription")
-    public ResponseEntity<ResultAndMessage<String>> enrollSubscription(@RequestParam(name = "departmentId") Long departmentId,
-                                                               Authentication authentication) {
+    public ResponseEntity<ResultAndMessage<String>> enrollSubscription(@RequestBody UserSubDto userSubDto,
+                                                                       Authentication authentication) {
 
-        userFeatureService.addUserSubDepartment(authentication.getName(), departmentId);
+        userFeatureService.addUserSubDepartment(authentication.getName(), userSubDto.getDepartmentId());
 
         return ResponseEntity.ok()
                 .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), "공지사항 구독이 추가되었습니다."));
@@ -57,9 +58,9 @@ public class UserController {
 
     // 유저 구독 삭제
     @DeleteMapping("/notice-subscription")
-    public ResponseEntity<ResultAndMessage<String>> deleteSubscription(@RequestParam(name = "departmentId") Long departmentId,
+    public ResponseEntity<ResultAndMessage<String>> deleteSubscription(@Validated @RequestBody UserSubDto userSubDto,
                                                 Authentication authentication) {
-        userFeatureService.deleteSubscription(authentication.getName(), departmentId);
+        userFeatureService.deleteSubscription(authentication.getName(), userSubDto.getDepartmentId());
 
         return ResponseEntity.ok()
                 .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), "공지사항 구독이 삭제되었습니다."));

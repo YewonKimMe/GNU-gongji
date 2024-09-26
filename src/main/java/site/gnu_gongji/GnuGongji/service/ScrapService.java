@@ -10,6 +10,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.gnu_gongji.GnuGongji.dto.ScrapResult;
+import site.gnu_gongji.GnuGongji.dto.ScrapResultDto;
 import site.gnu_gongji.GnuGongji.entity.Department;
 import site.gnu_gongji.GnuGongji.entity.DepartmentNoticeInfo;
 
@@ -30,11 +32,14 @@ public class ScrapService {
 
     private final DepartmentService departmentService;
 
-    // TODO 스크랩 결과 저장 자료구조 추가
+    private final NotificationService notificationService;
 
     // scrap, 요청 관계 없이 스케줄링으로 처리
-    @Scheduled(cron = "0 0 9-23 * * ?")
+    //@Scheduled(cron = "0 0 9-23 * * ?")
+    @Scheduled(cron = "0 */10 9-23 * * ?")
     public void scrap() {
+        // 스크랩 결과 저장 자료구조 추가
+        List<ScrapResultDto> resultList = new ArrayList<>();
 
         String baseUrl = "https://www.gnu.ac.kr/%s/na/ntt/";
 
@@ -43,6 +48,15 @@ public class ScrapService {
 
         // 모든 Department 에 대해서 반복작업 수행
         for (Department department : allDptList) {
+
+            // 부서단위 스크랩 결과 저장 객체(부서(부서상세정보1, 부서상세정보2, ..))
+            ScrapResultDto scrapResultDto = ScrapResultDto.builder()
+                    .departmentId(department.getDepartmentId())
+                    .departmentName(department.getDepartmentKo())
+                    .scrapResultList(new ArrayList<>())
+                    .build();
+
+
             List<DepartmentNoticeInfo> departmentNoticeInfoList = department.getDepartmentNoticeInfoList();
             String departmentKo = department.getDepartmentKo(); // 부서 이름
             String formattedBaseUrl = String.format(baseUrl, department.getDepartmentEng());
@@ -109,19 +123,33 @@ public class ScrapService {
                         log.debug("[{} {}]={}", title, date, formattedNoticeLinkUrl);
 
                         nttSnList.add(Integer.parseInt(nttSn)); // nttSn 저장
+
+                        // 위의 분기문을 전부 통과한 요소는 새로 등록된 요소
+                        ScrapResult scrapResult = ScrapResult.builder()
+                                .departmentId(department.getDepartmentId())
+                                .departmentName(department.getDepartmentKo())
+                                .title(title)
+                                .date(date)
+                                .noticeLink(formattedNoticeLinkUrl)
+                                .build();
+                        scrapResultDto.getScrapResultList().add(scrapResult);
                     }
                     nttSnList.sort(Collections.reverseOrder()); // lastNttSn 저장
                     if (!nttSnList.isEmpty()) { // 공지사항이 스크랩된 경우 == List 가 비어있지 않은 경우
                         departmentNoticeInfo.setLastNttSn(nttSnList.get(0));
                     }
-
-                    // TODO 알림 발송
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
 
             }
+            // 부서 별 세부 크롤링 결과 저장
+            resultList.add(scrapResultDto);
         }
+
+        // 알림 발송 함수 호출
+        notificationService
+                .sendNotification(resultList);
     }
 
     private static LocalDate getLocalDate(String date) {
