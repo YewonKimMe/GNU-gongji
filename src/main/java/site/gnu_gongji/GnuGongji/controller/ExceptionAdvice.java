@@ -17,7 +17,7 @@ public class ExceptionAdvice {
 
     // JWT Filter 예외 처리
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ResultAndMessage<String>> handleBadCredentialException(BadCredentialsException e) {
+    public ResponseEntity<ResultAndMessage> handleBadCredentialException(BadCredentialsException e) {
 
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
@@ -32,7 +32,7 @@ public class ExceptionAdvice {
             SubscriptionLimitReachedException.class,
             UserNotExistException.class
     })
-    public ResponseEntity<ResultAndMessage<String>> handleMultiException(Exception e) {
+    public ResponseEntity<ResultAndMessage> handleMultiException(Exception e) {
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
@@ -40,7 +40,7 @@ public class ExceptionAdvice {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ResultAndMessage<String>> handleException(Exception e) {
+    public ResponseEntity<ResultAndMessage> handleException(Exception e) {
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)

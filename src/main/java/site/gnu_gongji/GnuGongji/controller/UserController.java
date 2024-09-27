@@ -38,7 +38,7 @@ public class UserController {
 
     // 유저 이메일 변경
     @PatchMapping("/email")
-    public ResponseEntity<ResultAndMessage<String>> changeUserEmail(@Validated @RequestBody EmailDto emailDto,
+    public ResponseEntity<ResultAndMessage> changeUserEmail(@Validated @RequestBody EmailDto emailDto,
                                              Authentication authentication) {
         userFeatureService.updateUserEmail(authentication.getName(), emailDto);
         return ResponseEntity.ok()
@@ -47,7 +47,7 @@ public class UserController {
 
     // 유저 구독 등록
     @PostMapping("/notice-subscription")
-    public ResponseEntity<ResultAndMessage<String>> enrollSubscription(@RequestBody UserSubDto userSubDto,
+    public ResponseEntity<ResultAndMessage> enrollSubscription(@RequestBody UserSubDto userSubDto,
                                                                        Authentication authentication) {
 
         userFeatureService.addUserSubDepartment(authentication.getName(), userSubDto.getDepartmentId());
@@ -58,7 +58,7 @@ public class UserController {
 
     // 유저 구독 삭제
     @DeleteMapping("/notice-subscription")
-    public ResponseEntity<ResultAndMessage<String>> deleteSubscription(@Validated @RequestBody UserSubDto userSubDto,
+    public ResponseEntity<ResultAndMessage> deleteSubscription(@Validated @RequestBody UserSubDto userSubDto,
                                                 Authentication authentication) {
         userFeatureService.deleteSubscription(authentication.getName(), userSubDto.getDepartmentId());
 
