@@ -139,6 +139,7 @@ public class ScrapService {
                         departmentNoticeInfo.setLastNttSn(nttSnList.get(0));
                     }
                 } catch (IOException e) {
+                    log.error("[SCRAP ERROR] department={}, dept_url={}", department.getDepartmentKo(), formattedNoticeUrl);
                     throw new RuntimeException(e);
                 }
 
@@ -149,7 +150,7 @@ public class ScrapService {
 
         // 알림 발송 함수 호출
         notificationService
-                .sendNotification(resultList);
+                .handleNotificationProcess(resultList);
     }
 
     private static LocalDate getLocalDate(String date) {
