@@ -45,7 +45,7 @@ public class FcmService {
     }
 
     private String getAccessToken() throws IOException {
-        String firebaseConfigPath = "firebase/gnu-gongji-firebase-adminsdk-p9h0v-4fed761b99";
+        String firebaseConfigPath = "firebase/gnu-gongji-firebase-adminsdk-p9h0v-4fed761b99.json";
 
         GoogleCredentials googleCredentials = GoogleCredentials
                 .fromStream(new ClassPathResource(firebaseConfigPath).getInputStream())
@@ -63,10 +63,11 @@ public class FcmService {
                 .message(
                         FcmMessageDto.Message.builder()
                                 .token(fcmNotificationDto.getToken())
-                                .notification(FcmMessageDto.Notification.builder()
-                                        .title(fcmNotificationDto.getTitle())
-                                        .body(fcmNotificationDto.getBody())
-                                        .image(null).build())
+                                .notification(null)
+                                .data(FcmMessageDto.Data.builder()
+                                                .title(fcmNotificationDto.getTitle())
+                                                .body(fcmNotificationDto.getBody())
+                                                .image(null).build())
                                 .build()
                 ).validateOnly(false).build();
         return objectMapper.writeValueAsString(fcmMessage);
