@@ -67,6 +67,7 @@ public class FcmService {
                                 .data(FcmMessageDto.Data.builder()
                                                 .title(fcmNotificationDto.getTitle())
                                                 .body(fcmNotificationDto.getBody())
+                                        .link(fcmNotificationDto.getLink())
                                                 .image(null).build())
                                 .build()
                 ).validateOnly(false).build();
