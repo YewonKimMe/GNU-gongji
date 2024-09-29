@@ -35,5 +35,6 @@ public class FcmMessageDto {
         private String title;
         private String body;
         private String image;
+        private String link;
     }
 }
