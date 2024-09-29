@@ -13,10 +13,13 @@ public class FcmNotificationDto {
 
     String body;
 
+    String link;
+
     @Builder(toBuilder = true)
-    public FcmNotificationDto(String token, String title, String body) {
+    public FcmNotificationDto(String token, String title, String body, String link) {
         this.token = token;
         this.title = title;
         this.body = body;
+        this.link = link;
     }
 }
