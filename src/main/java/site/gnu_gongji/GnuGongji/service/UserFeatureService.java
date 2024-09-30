@@ -4,12 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.gnu_gongji.GnuGongji.dto.DepartmentDto;
 import site.gnu_gongji.GnuGongji.dto.EmailDto;
 import site.gnu_gongji.GnuGongji.entity.User;
 import site.gnu_gongji.GnuGongji.entity.UserSub;
 import site.gnu_gongji.GnuGongji.exception.*;
 import site.gnu_gongji.GnuGongji.repository.UserFeatureRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Transactional
@@ -103,5 +105,9 @@ public class UserFeatureService {
         if (!departmentService.checkDepartmentExistByDId(departmentId)) {
             throw new DepartmentNotExistException("해당 ID로 검색된 학과/부서가 없습니다.");
         }
+    }
+
+    public List<DepartmentDto> getUserSub(String oauth2Id) {
+        return userFeatureRepository.findDepartmentsByUserOauth2Id(oauth2Id);
     }
 }
