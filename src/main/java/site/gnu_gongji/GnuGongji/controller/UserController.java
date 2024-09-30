@@ -7,11 +7,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import site.gnu_gongji.GnuGongji.dto.DepartmentDto;
 import site.gnu_gongji.GnuGongji.dto.EmailDto;
 import site.gnu_gongji.GnuGongji.dto.UserSubDto;
 import site.gnu_gongji.GnuGongji.dto.response.ResultAndMessage;
 import site.gnu_gongji.GnuGongji.dto.response.SuccessResultAndMessage;
 import site.gnu_gongji.GnuGongji.service.UserFeatureService;
+
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -64,5 +67,17 @@ public class UserController {
 
         return ResponseEntity.ok()
                 .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), "공지사항 구독이 삭제되었습니다."));
+    }
+
+    // 내 구독 정보 조회
+    @GetMapping("/my-notice-subscription")
+    public ResponseEntity<ResultAndMessage> getUserSub(Authentication authentication) {
+
+        log.debug("[USER SUB] userId={}", authentication.getName());
+
+        List<DepartmentDto> userSub = userFeatureService.getUserSub(authentication.getName());
+
+        return ResponseEntity.ok()
+                .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), userSub));
     }
 }
