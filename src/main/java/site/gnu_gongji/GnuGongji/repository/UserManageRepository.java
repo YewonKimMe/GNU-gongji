@@ -13,6 +13,8 @@ public interface UserManageRepository {
 
     Optional<User> findUserByOauth2IdAndOAuth2Provider(String oauth2Id, String oauth2Provider);
 
+    Optional<User> findUserByOAuth2Id(String oAuth2Id);
+
     boolean deleteUser(String id, String providerName);
 
     boolean updateRefreshToke(String oauth2Id, String oauth2Provider, String newRefreshToken);
