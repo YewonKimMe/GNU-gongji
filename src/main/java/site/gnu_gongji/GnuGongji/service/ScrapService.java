@@ -19,9 +19,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -35,8 +33,10 @@ public class ScrapService {
     private final NotificationService notificationService;
 
     // scrap, 요청 관계 없이 스케줄링으로 처리
-    //@Scheduled(cron = "0 0 9-23 * * ?")
-    @Scheduled(cron = "0 */10 9-23 * * ?")
+
+//    @Scheduled(cron = "0 */10 9-23 * * ?")
+//    @Scheduled(cron = "0 0 9-23 * * ?")
+    @Scheduled(cron = "0 0/30 9-23 * * ?")
     public void scrap() {
         // 스크랩 결과 저장 자료구조 추가
         List<ScrapResultDto> resultList = new ArrayList<>();
@@ -69,7 +69,7 @@ public class ScrapService {
 
             // 부서 별 다수 공지사항 링크가 존재
             for (DepartmentNoticeInfo departmentNoticeInfo : departmentNoticeInfoList) {
-
+                TreeSet<Integer> nttSnSet = new TreeSet<>(Comparator.reverseOrder());
                 List<Integer> nttSnList = new ArrayList<>();
 
                 int mi = departmentNoticeInfo.getMi(); // 공지사항 접속 링크 - queryParam: mi
@@ -122,7 +122,7 @@ public class ScrapService {
                         String formattedNoticeLinkUrl = String.format(baseNoticeLinkUrl, formattedBaseUrl, mi, bbsId, nttSn);
                         log.debug("[{} {}]={}", title, date, formattedNoticeLinkUrl);
 
-                        nttSnList.add(Integer.parseInt(nttSn)); // nttSn 저장
+                        nttSnSet.add(Integer.parseInt(nttSn)); // nttSn 저장
 
                         // 위의 분기문을 전부 통과한 요소는 새로 등록된 요소
                         ScrapResult scrapResult = ScrapResult.builder()
@@ -134,9 +134,10 @@ public class ScrapService {
                                 .build();
                         scrapResultDto.getScrapResultList().add(scrapResult);
                     }
-                    nttSnList.sort(Collections.reverseOrder()); // lastNttSn 저장
-                    if (!nttSnList.isEmpty()) { // 공지사항이 스크랩된 경우 == List 가 비어있지 않은 경우
-                        departmentNoticeInfo.setLastNttSn(nttSnList.get(0));
+                    //nttSnList.sort(Collections.reverseOrder()); // lastNttSn 저장
+                    if (!nttSnSet.isEmpty()) { // 공지사항이 스크랩된 경우 == Set 이 비어있지 않은 경우
+                        log.debug(nttSnSet.toString());
+                        departmentNoticeInfo.setLastNttSn(nttSnSet.first());
                     }
                 } catch (IOException e) {
                     log.error("[SCRAP ERROR] department={}, dept_url={}", department.getDepartmentKo(), formattedNoticeUrl);
@@ -144,13 +145,19 @@ public class ScrapService {
                 }
 
             }
-            // 부서 별 세부 크롤링 결과 저장
-            resultList.add(scrapResultDto);
+            // 부서 별 세부 크롤링 결과 저장, 저장되어 있는 경우에
+            if (!scrapResultDto.getScrapResultList().isEmpty()) {
+                resultList.add(scrapResultDto);
+            }
+
         }
 
         // 알림 발송 함수 호출
-        notificationService
-                .handleNotificationProcess(resultList);
+        // 무조건 호출되는게 아니라 스크랩된 것이 있으면 호출
+        if (!resultList.isEmpty()) {
+            notificationService
+                    .handleNotificationProcess(resultList);
+        }
     }
 
     private static LocalDate getLocalDate(String date) {
