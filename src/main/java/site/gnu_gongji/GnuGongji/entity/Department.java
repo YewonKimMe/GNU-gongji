@@ -30,7 +30,7 @@ public class Department {
 //    @OneToMany(mappedBy = "department")
 //    private List<UserSubDepartment> userSubDepartmentList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "department",fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "department",fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JsonManagedReference
     private List<DepartmentNoticeInfo> departmentNoticeInfoList = new ArrayList<>();
 }
