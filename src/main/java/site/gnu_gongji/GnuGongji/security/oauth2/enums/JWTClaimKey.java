@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 public enum JWTClaimKey {
     ISSUER("GNU-GONGJI"),
     TYPE("type"),
+    SUBJECT("subject"),
     PROVIDER("provider"),
     USERNAME("username"),
     OAUTH2_ID("id"),
