@@ -28,6 +28,8 @@ public class NotificationService {
     //////// 알림 과정 처리 메소드, 실제 발송은 sendNotification ////////
     public void handleNotificationProcess(List<ScrapResultDto> scrapResultDtoList) {
 
+        log.debug("[Execute handleNotificationProcess]");
+
         List<User> userList = userManageService.findUsersWithActiveSubscriptionsAndNotifications(); // 사용자 리스트, 길이는 n
 
         for (ScrapResultDto scrapResultDto : scrapResultDtoList) { // 최대 200개 내외임을 보장
@@ -51,7 +53,7 @@ public class NotificationService {
                             for (ScrapResult scrapResult : scrapResultList) {
                                 FcmNotificationDto fcmMessageDto = createFcmMessageDto(scrapResult, user);
 
-                                // FCM Push Message 전송
+                                //////// FCM Push Message 전송 ////////
                                 try {
                                     fcmService.sendMessage(fcmMessageDto);
                                 } catch (IOException e) {
@@ -76,7 +78,7 @@ public class NotificationService {
         return FcmNotificationDto.builder()
                 .token(user.getFcmToken())
                 .title(scrapResult.getDepartmentName())
-                .body(scrapResult.getTitle())
+                .body(scrapResult.getTitle() + " \n(" + scrapResult.getDate() + ")")
                 .link(scrapResult.getNoticeLink())
                 .build();
     }
