@@ -87,7 +87,7 @@ public class UserManageService {
                 .orElseThrow(() -> new UserNotExistException("구독, 알림 설정중인 유저가 없습니다."));
     }
 
-    public void updateUserToken(String userOAuth2Id, String newFcmToken) {
+    public void updateUserFcmToken(String userOAuth2Id, String newFcmToken) {
         User user = userManageRepository.findUserByOAuth2Id(userOAuth2Id)
                 .orElseThrow(() -> new UserNotExistException("해당 ID로 검색된 유저가 없습니다."));
         user.setFcmToken(newFcmToken);
