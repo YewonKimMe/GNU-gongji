@@ -9,9 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import site.gnu_gongji.GnuGongji.dto.DepartmentDto;
 import site.gnu_gongji.GnuGongji.dto.response.ResultAndMessage;
 import site.gnu_gongji.GnuGongji.dto.response.SuccessResultAndMessage;
-import site.gnu_gongji.GnuGongji.entity.Department;
 import site.gnu_gongji.GnuGongji.service.DepartmentService;
 
 import java.util.List;
@@ -29,7 +29,7 @@ public class InfoController {
     @Operation(summary = "구독 가능 학과 리스트", description = "구독 가능 학과 리스트 획득 API")
     @GetMapping("/departments")
     public ResponseEntity<ResultAndMessage> getDepartmentList() {
-        List<Department> result = departmentService.getAllDepartmentNoticeInfo();
+        List<DepartmentDto> result = departmentService.getAllDepartment();
         return ResponseEntity.ok()
                 .body(new SuccessResultAndMessage(HttpStatus.OK.getReasonPhrase(), result));
     }
