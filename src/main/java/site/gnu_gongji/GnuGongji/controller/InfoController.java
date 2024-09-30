@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,7 @@ import site.gnu_gongji.GnuGongji.dto.response.SuccessResultAndMessage;
 import site.gnu_gongji.GnuGongji.service.DepartmentService;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RestController
@@ -31,7 +33,8 @@ public class InfoController {
     public ResponseEntity<ResultAndMessage> getDepartmentList() {
         List<DepartmentDto> result = departmentService.getAllDepartment();
         return ResponseEntity.ok()
-                .body(new SuccessResultAndMessage(HttpStatus.OK.getReasonPhrase(), result));
+                .cacheControl(CacheControl.maxAge(30, TimeUnit.SECONDS))
+                .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), result));
     }
 
     // 학과 또는 단과대? 검색 기능
