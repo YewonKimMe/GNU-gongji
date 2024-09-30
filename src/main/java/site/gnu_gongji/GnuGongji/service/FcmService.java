@@ -26,6 +26,8 @@ public class FcmService {
 
     public int sendMessage(FcmNotificationDto fcmNotificationDto) throws IOException {
 
+        log.debug("[Execute sendMessage]");
+
         String message = createMessage(fcmNotificationDto);
 
         RestTemplate restTemplate = new RestTemplate();
