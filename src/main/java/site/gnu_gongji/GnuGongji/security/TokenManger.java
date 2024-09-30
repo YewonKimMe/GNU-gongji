@@ -1,5 +1,6 @@
 package site.gnu_gongji.GnuGongji.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
@@ -67,10 +68,12 @@ public class TokenManger {
 
             // jwt 만료 상황
             if (tokenType == TokenType.ACCESS) {
-                return checkRefreshToken(token, jwtSecret);
+                return checkRefreshToken(token);
             } else if (tokenType == TokenType.REFRESH) {
 
-                Claims claim = getClaim(token, jwtSecret);
+                Map<String, Object> claim = getClaim(token);
+
+                if (claim == null) return false;
 
                 String provider = String.valueOf(claim.get(PROVIDER.getClaimKey()));
                 String oauth2Id = String.valueOf(claim.get(OAUTH2_ID.getClaimKey()));
@@ -81,7 +84,7 @@ public class TokenManger {
                 String newRefreshToken = createRefreshToken(
                         TokenType.REFRESH,
                         TokenDurationTime.REFRESH,
-                        claim.getSubject(),
+                        (String) claim.get(SUBJECT.getClaimKey()),
                         provider,
                         oauth2Id,
                         username,
@@ -98,9 +101,9 @@ public class TokenManger {
         return false; // SecurityContext.clearContext() -> Exception(501 response)
     }
 
-    private boolean checkRefreshToken(String invalidAccessJwt, String jwtSecret) {
+    private boolean checkRefreshToken(String invalidAccessJwt) {
 
-        Claims claim = getClaim(invalidAccessJwt, jwtSecret);
+        Map<String, Object> claim = getClaim(invalidAccessJwt);
 
         String oauth2Id = String.valueOf(claim.get(OAUTH2_ID.getClaimKey()));
         String oauth2Provider = String.valueOf(claim.get(PROVIDER.getClaimKey()));
@@ -137,14 +140,27 @@ public class TokenManger {
                 .compact();
     }
 
-    private Claims getClaim(String jwtToken, String jwtSecret) {
-        SecretKey secretKey = getSecretKey(jwtSecret);
+    private Map<String, Object> getClaim(String jwtToken) {
+        try {
+            // '.' 기준 분할
+            String[] tokenParts = jwtToken.split("\\.");
 
-        return Jwts.parser()
-                .verifyWith(secretKey)
-                .build()
-                .parseSignedClaims(jwtToken)
-                .getPayload();
+            if (tokenParts.length < 2) {
+                throw new IllegalArgumentException("유효하지 않은 JWT 형식입니다.");
+            }
+
+            // 두 번째 부분인 payload를 Base64Url로 디코딩
+            String payload = new String(Base64.getUrlDecoder().decode(tokenParts[1]), StandardCharsets.UTF_8);
+
+            // JSON 파싱을 위해 Jackson ObjectMapper를 사용
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            return objectMapper.readValue(payload, Map.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+            //return null; // 예외 발생 시 null 반환 또는 예외 처리
+        }
     }
 
     public String createJwtToken(Authentication authentication, OAuth2User oAuth2User, TokenType tokenType, TokenDurationTime tokenDurationTime) {
@@ -193,13 +209,8 @@ public class TokenManger {
 
     public Authentication getAuth(String jwtToken) {
 
-        SecretKey secretKey = getSecretKey(jwtSecret);
-
-        Claims claims = Jwts.parser()
-                .verifyWith(secretKey)
-                .build()
-                .parseSignedClaims(jwtToken)
-                .getPayload();
+        Map<String, Object> claims = getClaim(jwtToken);
+        if (claims == null) return null;
         String username = String.valueOf(claims.get(USERNAME.getClaimKey()));
         String authorities = String.valueOf(claims.get(AUTHORITIES.getClaimKey()));
         List<GrantedAuthority> authoritiesList = AuthorityUtils.commaSeparatedStringToAuthorityList(authorities);
