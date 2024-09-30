@@ -105,6 +105,8 @@ public class TokenManger {
 
         Map<String, Object> claim = getClaim(invalidAccessJwt);
 
+        if (claim == null) return false;
+
         String oauth2Id = String.valueOf(claim.get(OAUTH2_ID.getClaimKey()));
         String oauth2Provider = String.valueOf(claim.get(PROVIDER.getClaimKey()));
 
