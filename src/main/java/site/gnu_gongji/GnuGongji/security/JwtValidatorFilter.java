@@ -40,6 +40,7 @@ public class JwtValidatorFilter extends OncePerRequestFilter {
             Authentication authentication = tokenManger.getAuth(jwtToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } else { // SecurityContextHolder clear, AuthenticationException entrypoint catch, client 는 인증정보 제거
+            log.error("JWT Error, path={}", request.getServletPath());
             SecurityContextHolder.clearContext();
             request.setAttribute("BadCdEx", new BadCredentialsException("잘못된 인증 토큰입니다."));
             //throw new BadCredentialsException("잘못된 인증 토큰입니다.");
