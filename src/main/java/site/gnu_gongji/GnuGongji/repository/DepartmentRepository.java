@@ -1,5 +1,6 @@
 package site.gnu_gongji.GnuGongji.repository;
 
+import site.gnu_gongji.GnuGongji.dto.DepartmentDto;
 import site.gnu_gongji.GnuGongji.entity.Department;
 
 import java.util.List;
@@ -13,4 +14,6 @@ public interface DepartmentRepository {
     boolean checkDepartmentByDId(Long departmentId);
 
     List<Department> getAllDepartmentNoticeInfo();
+
+    List<DepartmentDto> getAllDepartment();
 }

@@ -5,6 +5,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
+import site.gnu_gongji.GnuGongji.dto.DepartmentDto;
 import site.gnu_gongji.GnuGongji.entity.Department;
 
 import java.util.List;
@@ -47,6 +48,12 @@ public class DepartmentRepositoryImpl implements DepartmentRepository {
     public List<Department> getAllDepartmentNoticeInfo() {
 
         return em.createQuery("SELECT d FROM Department d JOIN FETCH d.departmentNoticeInfoList", Department.class)
+                .getResultList();
+    }
+
+    @Override
+    public List<DepartmentDto> getAllDepartment() {
+        return em.createQuery("SELECT new site.gnu_gongji.GnuGongji.dto.DepartmentDto(d.departmentId, d.departmentKo, d.departmentEng) FROM Department d")
                 .getResultList();
     }
 }
