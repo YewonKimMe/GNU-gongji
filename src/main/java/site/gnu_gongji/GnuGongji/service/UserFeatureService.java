@@ -59,7 +59,7 @@ public class UserFeatureService {
                 .stream()
                 .filter(userSub -> userSub.getDepartmentId().equals(departmentId))
                 .findFirst()
-                .ifPresent(sub -> {throw new DuplicateSubscribeException("중복된 구독입니다.");
+                .ifPresent(sub -> {throw new DuplicateSubscribeException("이미 구독중인 학과/부서입니다.");
                 });
 
         UserSub userSub = new UserSub();
