@@ -73,8 +73,6 @@ public class NoticeExcelParser {
                             //departmentNoticeInfoList.remove(departmentNoticeInfoList.size() - 1);
                             //log.debug("[DP_INFO]={}", deptNoticeInfo);
 
-                            // TODO 연관관계 설정, 저장
-
                             log.debug("[DP]={}", map.get(beforeDpName));
                             departmentService.saveDepartmentComb(map.get(beforeDpName));
                             map.remove(beforeDpName);
