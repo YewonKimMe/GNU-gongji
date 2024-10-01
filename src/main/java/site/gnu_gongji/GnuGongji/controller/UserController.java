@@ -61,9 +61,9 @@ public class UserController {
 
     // 유저 구독 삭제
     @DeleteMapping("/notice-subscription")
-    public ResponseEntity<ResultAndMessage> deleteSubscription(@Validated @RequestBody UserSubDto userSubDto,
+    public ResponseEntity<ResultAndMessage> deleteSubscription(@RequestParam(name = "departmentId") Long departmentId,
                                                 Authentication authentication) {
-        userFeatureService.deleteSubscription(authentication.getName(), userSubDto.getDepartmentId());
+        userFeatureService.deleteSubscription(authentication.getName(), departmentId);
 
         return ResponseEntity.ok()
                 .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), "공지사항 구독이 삭제되었습니다."));
