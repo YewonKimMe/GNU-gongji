@@ -2,6 +2,7 @@ package site.gnu_gongji.GnuGongji.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.gnu_gongji.GnuGongji.dto.UserCreateDto;
@@ -24,6 +25,9 @@ import java.util.Optional;
 @Service
 public class UserManageService {
 
+    @Value("${mycustom.sub-limit}")
+    private int subLimit;
+
     private final UserManageRepository userManageRepository;
 
     public UserCreateDto createOAuth2User(OAuth2UserPrincipal oAuth2UserPrincipal, String refreshToken) {
@@ -44,6 +48,7 @@ public class UserManageService {
                 .refreshToken(refreshToken)
                 .authorities(new HashSet<>())
                 .createDate(createDate)
+                .subLimit(subLimit)
                 .build();
 
         Authority authority = Authority.builder()
