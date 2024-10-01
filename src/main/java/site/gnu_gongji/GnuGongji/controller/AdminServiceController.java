@@ -14,7 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 import site.gnu_gongji.GnuGongji.dto.response.ResultAndMessage;
 import site.gnu_gongji.GnuGongji.dto.response.SuccessResultAndMessage;
 import site.gnu_gongji.GnuGongji.entity.Department;
-import site.gnu_gongji.GnuGongji.entity.DepartmentNoticeInfo;
 import site.gnu_gongji.GnuGongji.service.DepartmentService;
 import site.gnu_gongji.GnuGongji.service.NoticeExcelParser;
 
