@@ -77,7 +77,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests((requests) -> requests
                                 .requestMatchers("/api/v1/user/**").hasRole("USER")
-                                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                                .requestMatchers("/api/v1/admin/**", "/api/v1/test/**").hasRole("ADMIN")
                                 .requestMatchers("/api/v1/info/**").hasRole("USER")
                                 .requestMatchers("/api/v1/firebase").hasRole("USER")
                                 .requestMatchers("/api/v1/**").permitAll()
