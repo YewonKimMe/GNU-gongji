@@ -76,13 +76,12 @@ public class SecurityConfig {
                                 )
                 )
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/api/v1/user/**").hasRole("USER")
-                                .requestMatchers("/api/v1/admin/**").hasRole("USER")
-                        .requestMatchers("/api/v1/subscribe/**").hasRole("USER")
+                                .requestMatchers("/api/v1/user/**").hasRole("USER")
+                                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                                .requestMatchers("/api/v1/info/**").hasRole("USER")
                                 .requestMatchers("/api/v1/firebase").hasRole("USER")
-                        .requestMatchers("/api/v1/**").permitAll()
+                                .requestMatchers("/api/v1/**").permitAll()
                                 .anyRequest().permitAll()
-                        //.anyRequest().denyAll()
                 )
                 .oauth2Login(configurer -> configurer.
                         authorizationEndpoint(config -> config.authorizationRequestRepository(oAuth2AuthorizationRequestCookieRepository)).
