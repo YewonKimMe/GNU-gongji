@@ -59,6 +59,7 @@ mycustom:
   cors:
     dev-url: ${DEV_URL}
     prod-url: ${PROD_URL}
+  sub-limit: ${SUB_LIMIT}
 
 # LOGGING LEVEL
 logging:
