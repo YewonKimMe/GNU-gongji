@@ -48,12 +48,6 @@ public class UserFeatureService {
 
         User findUser = findUserOpt.get();
 
-        int userSubSize = findUser.getSubList().size();
-
-        if (userSubSize >= 3) {
-            throw new SubscriptionLimitReachedException("공지사항 구독은 최대 2개 까지만 가능합니다.\n현재 구독중인 갯수는 " + userSubSize + " 입니다.");
-        }
-
         // userSub 에 해당 deptId 존재 여부 체크(중복 방지)
         findUser.getSubList()
                 .stream()
@@ -61,6 +55,15 @@ public class UserFeatureService {
                 .findFirst()
                 .ifPresent(sub -> {throw new DuplicateSubscribeException("이미 구독중인 학과/부서입니다.");
                 });
+
+        int userSubSize = findUser.getSubList().size();
+
+        // 유저의 구독 갯수 제한 조회
+        int limit = findUser.getSubLimit();
+
+        if (userSubSize >= limit) {
+            throw new SubscriptionLimitReachedException("해당 계정의 공지사항 구독은 최대 " + limit +"개 까지만 가능합니다.\n현재 구독중인 갯수는 " + userSubSize + "개 입니다.");
+        }
 
         UserSub userSub = new UserSub();
 
