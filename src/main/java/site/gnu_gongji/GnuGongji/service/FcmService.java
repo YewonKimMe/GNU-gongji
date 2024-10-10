@@ -3,6 +3,7 @@ package site.gnu_gongji.GnuGongji.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.GoogleCredentials;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
@@ -14,6 +15,7 @@ import site.gnu_gongji.GnuGongji.dto.FcmMessageDto;
 import site.gnu_gongji.GnuGongji.dto.FcmNotificationDto;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -23,6 +25,28 @@ public class FcmService {
 
     @Value("${firebase.api-url}")
     private String API_URL;
+
+    @Value("${firebase.json-directory}")
+    private String jsonDir;
+
+    private GoogleCredentials googleCredentials;
+
+    @PostConstruct
+    public void init() {
+        String firebaseConfigPath = jsonDir;
+
+        try (InputStream inputStream = new ClassPathResource(firebaseConfigPath).getInputStream()) {
+            this.googleCredentials = GoogleCredentials
+                    .fromStream(inputStream)
+                    .createScoped(List.of("https://www.googleapis.com/auth/cloud-platform"));
+            this.googleCredentials
+                    .refreshIfExpired();
+
+        } catch (IOException e) {
+            log.error("[Init Exception-{}]", e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
+    }
 
     public int sendMessage(FcmNotificationDto fcmNotificationDto) throws IOException {
 
@@ -47,13 +71,9 @@ public class FcmService {
     }
 
     private String getAccessToken() throws IOException {
-        String firebaseConfigPath = "firebase/gnu-gongji-firebase-adminsdk-p9h0v-4fed761b99.json";
-
-        GoogleCredentials googleCredentials = GoogleCredentials
-                .fromStream(new ClassPathResource(firebaseConfigPath).getInputStream())
-                .createScoped(List.of("https://www.googleapis.com/auth/cloud-platform"));
 
         googleCredentials.refreshIfExpired();
+
         return googleCredentials.getAccessToken().getTokenValue();
     }
 
