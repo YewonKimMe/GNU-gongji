@@ -42,6 +42,20 @@ public class ExceptionAdvice {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ResultAndMessage> handleException(Exception e) {
 
+        // 첫 번째 스택 트레이스 요소 (오류가 발생한 클래스 및 메서드 정보)
+        StackTraceElement[] stackTrace = e.getStackTrace();
+        StackTraceElement firstElement = stackTrace.length > 0 ? stackTrace[0] : null;
+
+        if (firstElement != null) {
+            log.error("[EXCEPTION_GLOBAL] message={}, class={}, method={}, line={}",
+                    e.getMessage(),
+                    firstElement.getClassName(),
+                    firstElement.getMethodName(),
+                    firstElement.getLineNumber());
+        } else {
+            log.error("[EXCEPTION_GLOBAL] message={}", e.getMessage());
+        }
+
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new FailResultAndMessage<>(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), "서버에 오류가 발생했습니다."));
