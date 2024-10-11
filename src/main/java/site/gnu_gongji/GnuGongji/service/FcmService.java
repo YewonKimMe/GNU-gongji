@@ -43,7 +43,7 @@ public class FcmService {
                     .refreshIfExpired();
 
         } catch (IOException e) {
-            log.error("[Init Exception-{}]", e.getMessage());
+            log.error("[FCM INIT EXCEPTION] message={}", e.getMessage());
             throw new RuntimeException(e.getMessage());
         }
     }
