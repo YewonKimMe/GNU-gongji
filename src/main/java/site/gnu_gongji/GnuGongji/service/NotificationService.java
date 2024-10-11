@@ -58,7 +58,6 @@ public class NotificationService {
                                     fcmService.sendMessage(fcmMessageDto);
                                 } catch (IOException e) {
                                     log.error("[FCM Message Send Exception], cause={}", e.getMessage());
-                                    throw new RuntimeException(e);
                                 }
                             }
                         });
