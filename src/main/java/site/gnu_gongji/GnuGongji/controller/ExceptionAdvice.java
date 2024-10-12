@@ -1,5 +1,6 @@
 package site.gnu_gongji.GnuGongji.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,18 +41,26 @@ public class ExceptionAdvice {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ResultAndMessage> handleException(Exception e) {
+    public ResponseEntity<ResultAndMessage> handleException(Exception e, HttpServletRequest request) {
 
+        String requestURI = null;
         // 첫 번째 스택 트레이스 요소 (오류가 발생한 클래스 및 메서드 정보)
         StackTraceElement[] stackTrace = e.getStackTrace();
         StackTraceElement firstElement = stackTrace.length > 0 ? stackTrace[0] : null;
 
+        // 요청 URI 로그 추가
+        if (request != null) {
+            requestURI = request.getRequestURI();
+        }
+
+
         if (firstElement != null) {
-            log.error("[EXCEPTION_GLOBAL] message={}, class={}, method={}, line={}",
+            log.error("[EXCEPTION_GLOBAL] message={}, class={}, method={}, line={}, requestURI={}",
                     e.getMessage(),
                     firstElement.getClassName(),
                     firstElement.getMethodName(),
-                    firstElement.getLineNumber());
+                    firstElement.getLineNumber(),
+                    requestURI);
         } else {
             log.error("[EXCEPTION_GLOBAL] message={}", e.getMessage());
         }
