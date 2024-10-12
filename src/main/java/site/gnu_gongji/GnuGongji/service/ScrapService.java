@@ -33,10 +33,7 @@ public class ScrapService {
     private final NotificationService notificationService;
 
     // scrap, 요청 관계 없이 스케줄링으로 처리
-
-//    @Scheduled(cron = "0 */10 9-23 * * ?")
-//    @Scheduled(cron = "0 0 9-23 * * ?")
-    @Scheduled(cron = "0 0/30 9-23 * * ?")
+    @Scheduled(cron = "${spring.task.scheduling.cron}")
     public void scrap() {
         // 스크랩 결과 저장 자료구조 추가
         List<ScrapResultDto> resultList = new ArrayList<>();
