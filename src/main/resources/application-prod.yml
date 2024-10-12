@@ -3,6 +3,9 @@ spring:
     name: GnuGongji
   jackson:
     time-zone: Asia/Seoul
+  task:
+    scheduling:
+      cron: ${CRON_EXPRESSION}
   # DATASOURCE SETTING
   datasource:
     url: ${DB_URL}
