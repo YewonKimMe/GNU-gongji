@@ -67,7 +67,6 @@ public class ScrapService {
             // 부서 별 다수 공지사항 링크가 존재
             for (DepartmentNoticeInfo departmentNoticeInfo : departmentNoticeInfoList) {
                 TreeSet<Integer> nttSnSet = new TreeSet<>(Comparator.reverseOrder());
-                List<Integer> nttSnList = new ArrayList<>();
 
                 int mi = departmentNoticeInfo.getMi(); // 공지사항 접속 링크 - queryParam: mi
                 int bbsId = departmentNoticeInfo.getBbsId(); // 공지사항 접속 링크 - queryParam: bbs_id
