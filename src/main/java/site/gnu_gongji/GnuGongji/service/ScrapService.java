@@ -35,6 +35,9 @@ public class ScrapService {
     // scrap, 요청 관계 없이 스케줄링으로 처리
     @Scheduled(cron = "${spring.task.scheduling.cron}")
     public void scrap() {
+
+        log.info("[SCRAP-Scheduled START]");
+
         // 스크랩 결과 저장 자료구조 추가
         List<ScrapResultDto> resultList = new ArrayList<>();
 
@@ -137,7 +140,6 @@ public class ScrapService {
                     }
                 } catch (IOException e) {
                     log.error("[SCRAP ERROR] department={}, dept_url={}", department.getDepartmentKo(), formattedNoticeUrl);
-                    throw new RuntimeException(e);
                 }
 
             }
