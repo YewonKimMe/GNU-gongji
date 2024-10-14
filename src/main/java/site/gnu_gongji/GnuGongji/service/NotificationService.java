@@ -30,6 +30,8 @@ public class NotificationService {
 
         log.debug("[Execute handleNotificationProcess]");
 
+        log.info("[Execute handleNotificationProcess] result_length={}", scrapResultDtoList.size());
+
         List<User> userList = userManageService.findUsersWithActiveSubscriptionsAndNotifications(); // 사용자 리스트, 길이는 n
 
         for (ScrapResultDto scrapResultDto : scrapResultDtoList) { // 최대 200개 내외임을 보장
