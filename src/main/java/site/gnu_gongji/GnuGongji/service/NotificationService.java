@@ -65,11 +65,14 @@ public class NotificationService {
                                     fcmService.sendMessage(fcmMessageDto, false);
                                 } catch (IOException e) {
                                     log.error("[FCM Message Send IOException], cause={}", e.getMessage());
+                                    break;
                                 } catch (HttpClientErrorException.NotFound httpClientErrorException) {
                                     handleHttpClientErrorExceptionNotFound(httpClientErrorException, user);
                                     log.error("[FCM Message Send HttpClientErrorException], cause={}", httpClientErrorException.getMessage());
+                                    break;
                                 } catch (Exception exception) {
                                     log.error("[UnExpectedException Occur], cause={}", exception.getMessage());
+                                    break;
                                 }
                             }
                         });
