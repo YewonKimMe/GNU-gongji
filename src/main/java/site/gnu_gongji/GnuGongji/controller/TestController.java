@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.web.bind.annotation.*;
 import site.gnu_gongji.GnuGongji.dto.FcmNotificationDto;
@@ -36,14 +35,6 @@ public class TestController {
 
     private final FcmService fcmService;
 
-    @GetMapping
-    public ResponseEntity<?> test(OAuth2AuthenticationToken token) {
-//        log.info("token={}", token.getPrincipal());
-//        log.info("token={}", token.getCredentials());
-//        log.info("token={}", token.getName());
-        return ResponseEntity.ok("hello");
-    }
-
     @GetMapping("/oidc-principal")
     public OidcUser getOidcUserPrincipal(
             @AuthenticationPrincipal OidcUser principal) {
@@ -69,7 +60,7 @@ public class TestController {
     @PostMapping("/noti-test")
     public ResponseEntity<ResultAndMessage> sendNotification(@RequestBody FcmNotificationDto fcmNotificationDto) {
         try {
-            int i = fcmService.sendMessage(fcmNotificationDto);
+            int i = fcmService.sendMessage(fcmNotificationDto, false);
             log.debug("[send result={}]", i);
         } catch (IOException e) {
             throw new RuntimeException(e);
