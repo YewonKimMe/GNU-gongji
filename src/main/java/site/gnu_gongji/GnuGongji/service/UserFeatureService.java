@@ -4,13 +4,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
 import site.gnu_gongji.GnuGongji.dto.DepartmentDto;
 import site.gnu_gongji.GnuGongji.dto.EmailDto;
+import site.gnu_gongji.GnuGongji.dto.FcmNotificationDto;
+import site.gnu_gongji.GnuGongji.dto.UserInfoDto;
 import site.gnu_gongji.GnuGongji.entity.User;
 import site.gnu_gongji.GnuGongji.entity.UserSub;
 import site.gnu_gongji.GnuGongji.exception.*;
 import site.gnu_gongji.GnuGongji.repository.UserFeatureRepository;
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +28,8 @@ public class UserFeatureService {
     private final DepartmentService departmentService;
 
     private final UserFeatureRepository userFeatureRepository;
+
+    private final FcmService fcmService;
 
     // 이메일 변경
     public void updateUserEmail(final String userOAuth2Id, final EmailDto emailDto) {
@@ -112,5 +119,40 @@ public class UserFeatureService {
 
     public List<DepartmentDto> getUserSub(String oauth2Id) {
         return userFeatureRepository.findDepartmentsByUserOauth2Id(oauth2Id);
+    }
+
+    public boolean checkUserFCMToken(String oAuth2Id) {
+        User findUser = userFeatureRepository.findUserByOauth2Id(oAuth2Id)
+                .orElseThrow(() -> new UserNotExistException("조회된 유저 정보가 없습니다."));
+
+        if (findUser.getFcmToken() == null) return false;
+
+        try {
+            fcmService.sendMessage(
+                    new FcmNotificationDto(findUser.getFcmToken(), "테스트 제목", "테스트 본문", "https://gnu-gongji.pages.dev"),
+                    true
+            );
+            return true;
+        } catch (HttpClientErrorException.NotFound e) {
+            return false;
+        }catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public UserInfoDto getUserInfoByOAuthId(String oAuth2Id) {
+        User findUser = userFeatureRepository.findUserByOauth2Id(oAuth2Id)
+                .orElseThrow(() -> new UserNotExistException("조회된 유저 정보가 없습니다."));
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        String formattedDate = sdf.format(findUser.getCreateDate());
+
+        return UserInfoDto.builder()
+                .oauth2Id(findUser.getOauth2Id())
+                .email(findUser.getUserEmail())
+                .oauth2Provider(findUser.getOauth2Provider())
+                .createDate(formattedDate)
+                .build();
     }
 }
