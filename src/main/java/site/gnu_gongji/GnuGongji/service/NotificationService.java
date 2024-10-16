@@ -1,9 +1,12 @@
 package site.gnu_gongji.GnuGongji.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
 import site.gnu_gongji.GnuGongji.dto.FcmNotificationDto;
 import site.gnu_gongji.GnuGongji.dto.ScrapResult;
 import site.gnu_gongji.GnuGongji.dto.ScrapResultDto;
@@ -24,6 +27,8 @@ public class NotificationService {
     private final UserManageService userManageService;
 
     private final FcmService fcmService;
+
+    private final ObjectMapper om = new ObjectMapper();
 
     //////// 알림 과정 처리 메소드, 실제 발송은 sendNotification ////////
     public void handleNotificationProcess(List<ScrapResultDto> scrapResultDtoList) {
@@ -57,13 +62,38 @@ public class NotificationService {
 
                                 //////// FCM Push Message 전송 ////////
                                 try {
-                                    fcmService.sendMessage(fcmMessageDto);
+                                    fcmService.sendMessage(fcmMessageDto, false);
                                 } catch (IOException e) {
-                                    log.error("[FCM Message Send Exception], cause={}", e.getMessage());
+                                    log.error("[FCM Message Send IOException], cause={}", e.getMessage());
+                                } catch (HttpClientErrorException.NotFound httpClientErrorException) {
+                                    handleHttpClientErrorExceptionNotFound(httpClientErrorException, user);
+                                    log.error("[FCM Message Send HttpClientErrorException], cause={}", httpClientErrorException.getMessage());
+                                } catch (Exception exception) {
+                                    log.error("[UnExpectedException Occur], cause={}", exception.getMessage());
                                 }
                             }
                         });
             }
+        }
+    }
+
+    public void handleHttpClientErrorExceptionNotFound(HttpClientErrorException.NotFound e, User user) {
+        try {
+            JsonNode errorNode = om.readTree(e.getResponseBodyAsString()).path("error");
+            int statusCode = errorNode.path("code").asInt();
+            String errorMessage = errorNode.path("message").asText();
+            String errorCode = errorNode.path("details").get(0).path("errorCode").asText();
+
+            if ("UNREGISTERED".equals(errorCode)) {
+                // 토큰 무효화
+                log.warn("[FCM Token Unregistered] for user: {}, code: {}, errorCode: {}, details: {}", user.getOauth2Id(), statusCode, errorCode, errorMessage);
+                userManageService.invalidateFcmToken(user.getOauth2Id());
+                log.info("[USER Token invalidated] user: {}", user.getOauth2Id());
+            } else {
+                log.error("[FCM NotFound Error] for user {}: {}", user.getOauth2Id(), errorNode.path("message").asText());
+            }
+        } catch (IOException jsonException) {
+            log.error("[Error parsing FCM error response] for user {}: {}", user.getOauth2Id(), jsonException.getMessage());
         }
     }
 
