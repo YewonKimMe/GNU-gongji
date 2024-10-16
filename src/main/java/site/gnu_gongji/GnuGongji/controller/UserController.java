@@ -2,19 +2,19 @@ package site.gnu_gongji.GnuGongji.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import site.gnu_gongji.GnuGongji.dto.DepartmentDto;
-import site.gnu_gongji.GnuGongji.dto.EmailDto;
-import site.gnu_gongji.GnuGongji.dto.UserSubDto;
+import site.gnu_gongji.GnuGongji.dto.*;
 import site.gnu_gongji.GnuGongji.dto.response.ResultAndMessage;
 import site.gnu_gongji.GnuGongji.dto.response.SuccessResultAndMessage;
 import site.gnu_gongji.GnuGongji.service.UserFeatureService;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -23,6 +23,23 @@ import java.util.List;
 public class UserController {
 
     private final UserFeatureService userFeatureService;
+
+    @GetMapping("/user-information")
+    public ResponseEntity<UserInfoDto> getUserInfo(Authentication authentication) {
+        UserInfoDto userInfo = userFeatureService.getUserInfoByOAuthId(authentication.getName());
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
+                .body(userInfo);
+    }
+
+    @GetMapping("/token-status")
+    public ResponseEntity<UserTokenStatusDto> getUserTokenValidStatus(Authentication authentication) {
+        boolean isTokenValid = userFeatureService.checkUserFCMToken(authentication.getName());
+
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
+                .body(new UserTokenStatusDto(isTokenValid));
+    }
 
     // 유저 로그아웃 기능
     @PostMapping("/logout")
