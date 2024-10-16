@@ -48,11 +48,11 @@ public class FcmService {
         }
     }
 
-    public int sendMessage(FcmNotificationDto fcmNotificationDto) throws IOException {
+    public int sendMessage(FcmNotificationDto fcmNotificationDto, boolean isValidateTest) throws IOException {
 
         log.debug("[Execute sendMessage]");
 
-        String message = createMessage(fcmNotificationDto);
+        String message = createMessage(fcmNotificationDto, isValidateTest);
 
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.getMessageConverters()
@@ -77,7 +77,7 @@ public class FcmService {
         return googleCredentials.getAccessToken().getTokenValue();
     }
 
-    private String createMessage(FcmNotificationDto fcmNotificationDto) throws JsonProcessingException {
+    private String createMessage(FcmNotificationDto fcmNotificationDto, boolean isValidateTest) throws JsonProcessingException {
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -92,7 +92,7 @@ public class FcmService {
                                         .link(fcmNotificationDto.getLink())
                                                 .image(null).build())
                                 .build()
-                ).validateOnly(false).build();
+                ).validateOnly(isValidateTest).build();
         return objectMapper.writeValueAsString(fcmMessage);
     }
 }
