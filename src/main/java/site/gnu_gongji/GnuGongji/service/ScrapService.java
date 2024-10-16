@@ -91,7 +91,7 @@ public class ScrapService {
                     }
                     // 날짜 인덱스
                     int dateIdx = -1;
-                    for (int i=0; i<noticeHeaders.size(); i++) { // 등록일 탐색
+                    for (int i = 0; i < noticeHeaders.size(); i++) { // 등록일 탐색
                         String headerText = noticeHeaders.get(i).text().trim();
                         if (headerText.equals("등록일")) {
                             dateIdx = i;
@@ -139,7 +139,9 @@ public class ScrapService {
                         departmentNoticeInfo.setLastNttSn(nttSnSet.first());
                     }
                 } catch (IOException e) {
-                    log.error("[SCRAP ERROR] department={}, dept_url={}", department.getDepartmentKo(), formattedNoticeUrl);
+                    log.error("[SCRAP IOException] department={}, dept_url={}", department.getDepartmentKo(), formattedNoticeUrl);
+                } catch (Exception e) {
+                    log.error("[SCRAP Exception] cause={}, department={}, dept_url={}", e.getMessage(), department.getDepartmentKo(), formattedNoticeUrl);
                 }
 
             }
