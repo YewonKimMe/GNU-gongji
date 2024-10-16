@@ -97,4 +97,12 @@ public class UserManageService {
                 .orElseThrow(() -> new UserNotExistException("해당 ID로 검색된 유저가 없습니다."));
         user.setFcmToken(newFcmToken);
     }
+
+    public void invalidateFcmToken(String oAuth2Id) {
+        User findUser = userManageRepository.findUserByOAuth2Id(oAuth2Id)
+                .orElseThrow(() -> new UserNotExistException("해당 ID로 검색된 유저가 없습니다."));
+
+        findUser.setRefreshToken(null);
+
+    }
 }
