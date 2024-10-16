@@ -153,6 +153,7 @@ public class UserFeatureService {
                 .email(findUser.getUserEmail())
                 .oauth2Provider(findUser.getOauth2Provider())
                 .createDate(formattedDate)
+                .isPushMessagingAgreed(findUser.getFcmToken() != null)
                 .build();
     }
 }
