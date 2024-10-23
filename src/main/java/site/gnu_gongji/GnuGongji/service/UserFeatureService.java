@@ -11,13 +11,17 @@ import site.gnu_gongji.GnuGongji.dto.FcmNotificationDto;
 import site.gnu_gongji.GnuGongji.dto.UserInfoDto;
 import site.gnu_gongji.GnuGongji.entity.User;
 import site.gnu_gongji.GnuGongji.entity.UserSub;
+import site.gnu_gongji.GnuGongji.entity.UserToken;
 import site.gnu_gongji.GnuGongji.exception.*;
 import site.gnu_gongji.GnuGongji.repository.UserFeatureRepository;
+import site.gnu_gongji.GnuGongji.security.oauth2.enums.Topic;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Transactional
 @RequiredArgsConstructor
@@ -41,7 +45,7 @@ public class UserFeatureService {
     }
 
     // 유저 공지사항 구독 추가
-    public void addUserSubDepartment(final String userOAuth2Id, final Long departmentId) {
+    public int addUserSubDepartment(final String userOAuth2Id, final Long departmentId) {
 
         // 유효한 부서 여부 확인
         checkDepartment(departmentId);
@@ -78,10 +82,21 @@ public class UserFeatureService {
         userSub.setUser(findUser);
 
         findUser.getSubList().add(userSub);
+
+        List<String> tokens = new ArrayList<>();
+        Set<UserToken> userTokens = findUser.getUserTokens();
+        for (UserToken userToken : userTokens) {
+            tokens.add(userToken.getToken());
+        }
+
+        // FCM
+        int subCnt = fcmService.subscribeTopic(tokens, Topic.DEPT_TOPIC_PATH.getPath() + departmentId);
+
+        return subCnt;
     }
 
     // 구독중인 유저 공지사항 삭제
-    public void deleteSubscription(final String userOAuth2Id, final Long departmentId) {
+    public int deleteSubscription(final String userOAuth2Id, final Long departmentId) {
 
         // 유효한 여부 확인
         checkDepartment(departmentId);
@@ -108,6 +123,14 @@ public class UserFeatureService {
 
         // 양방향 관계 정리
         findUserSub.setUser(null);
+
+        List<String> tokens = new ArrayList<>();
+        Set<UserToken> userTokens = findUser.getUserTokens();
+        for (UserToken userToken : userTokens) {
+            tokens.add(userToken.getToken());
+        }
+        // fcm 정리
+        return fcmService.unSubscribeTopic(tokens, Topic.DEPT_TOPIC_PATH.getPath() + departmentId);
     }
 
     private void checkDepartment(Long departmentId) {
