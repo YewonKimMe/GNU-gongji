@@ -1,5 +1,6 @@
 package site.gnu_gongji.GnuGongji.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -9,7 +10,9 @@ import org.springframework.web.bind.annotation.*;
 import site.gnu_gongji.GnuGongji.dto.FcmTokenDto;
 import site.gnu_gongji.GnuGongji.dto.response.ResultAndMessage;
 import site.gnu_gongji.GnuGongji.dto.response.SuccessResultAndMessage;
+import site.gnu_gongji.GnuGongji.security.oauth2.enums.Device;
 import site.gnu_gongji.GnuGongji.service.UserManageService;
+import site.gnu_gongji.GnuGongji.tool.DeviceUtil;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -20,24 +23,26 @@ public class FcmController {
     private final UserManageService userManageService;
 
     @PostMapping("/token")
-    public ResponseEntity<ResultAndMessage> enrollFcmToken(@RequestBody FcmTokenDto fcmTokenDto, Authentication authentication) {
+    public ResponseEntity<ResultAndMessage> enrollFcmToken(@RequestBody FcmTokenDto fcmTokenDto, Authentication authentication, HttpServletRequest request) {
 
         log.debug("[token 등록 요청] userId={}", authentication.getName());
         log.info("[token 등록 요청] userId={}", authentication.getName());
 
-        userManageService.updateUserFcmToken(authentication.getName(), fcmTokenDto.getToken());
+        Device deviceInfo = DeviceUtil.getDeviceInfo(request);
+
+        userManageService.updateUserFcmToken(authentication.getName(), fcmTokenDto.getToken(), deviceInfo);
 
         return ResponseEntity.ok()
                 .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), authentication.getName() + " 계정의 알림 설정 등록이 완료되었습니다."));
     }
 
     @DeleteMapping("/token")
-    public ResponseEntity<ResultAndMessage> deleteFcmToken(Authentication authentication) {
+    public ResponseEntity<ResultAndMessage> deleteFcmToken(@RequestParam(name = "option") String option, Authentication authentication, HttpServletRequest request) {
 
         log.debug("[token 삭제 요청] userId={}", authentication.getName());
         log.info("[token 삭제 요청] userId={}", authentication.getName());
 
-        userManageService.updateUserFcmToken(authentication.getName(), null);
+        userManageService.deleteUserFcmToken(authentication.getName(), option, request);
 
         return ResponseEntity.ok()
                 .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), authentication.getName() + " 계정의 알림 설정이 해지되었습니다."));
