@@ -156,7 +156,7 @@ public class ScrapService {
         // 무조건 호출되는게 아니라 스크랩된 것이 있으면 호출
         if (!resultList.isEmpty()) {
             notificationService
-                    .handleNotificationProcess(resultList);
+                    .handleNotificationProcessWithTopic(resultList);
         }
     }
 
