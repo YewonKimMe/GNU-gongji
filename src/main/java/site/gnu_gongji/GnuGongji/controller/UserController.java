@@ -1,5 +1,6 @@
 package site.gnu_gongji.GnuGongji.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.CacheControl;
@@ -68,22 +69,22 @@ public class UserController {
     // 유저 구독 등록
     @PostMapping("/notice-subscription")
     public ResponseEntity<ResultAndMessage> enrollSubscription(@RequestBody UserSubDto userSubDto,
-                                                                       Authentication authentication) {
+                                                               Authentication authentication, HttpServletRequest request) {
 
-        userFeatureService.addUserSubDepartment(authentication.getName(), userSubDto.getDepartmentId());
+        int successSubCnt = userFeatureService.addUserSubDepartment(authentication.getName(), userSubDto.getDepartmentId());
 
         return ResponseEntity.ok()
-                .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), "공지사항 구독이 추가되었습니다."));
+                .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), "공지사항 구독이 등록된 " + successSubCnt + " 개의 기기에 추가되었습니다."));
     }
 
     // 유저 구독 삭제
     @DeleteMapping("/notice-subscription")
     public ResponseEntity<ResultAndMessage> deleteSubscription(@RequestParam(name = "departmentId") Long departmentId,
                                                 Authentication authentication) {
-        userFeatureService.deleteSubscription(authentication.getName(), departmentId);
+        int successUnSubCnt = userFeatureService.deleteSubscription(authentication.getName(), departmentId);
 
         return ResponseEntity.ok()
-                .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), "공지사항 구독이 삭제되었습니다."));
+                .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), "공지사항 구독이 " + successUnSubCnt + " 개의 기기에서 삭제되었습니다."));
     }
 
     // 내 구독 정보 조회
