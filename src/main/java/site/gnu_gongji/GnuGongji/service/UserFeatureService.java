@@ -90,9 +90,7 @@ public class UserFeatureService {
         }
 
         // FCM
-        int subCnt = fcmService.subscribeTopic(tokens, Topic.DEPT_TOPIC_PATH.getPath() + departmentId);
-
-        return subCnt;
+        return fcmService.subscribeTopic(tokens, Topic.DEPT_TOPIC_PATH.getPath() + departmentId);
     }
 
     // 구독중인 유저 공지사항 삭제
@@ -144,6 +142,7 @@ public class UserFeatureService {
         return userFeatureRepository.findDepartmentsByUserOauth2Id(oauth2Id);
     }
 
+    // TODO 수정 필요
     public boolean checkUserFCMToken(String oAuth2Id) {
         User findUser = userFeatureRepository.findUserByOauth2Id(oAuth2Id)
                 .orElseThrow(() -> new UserNotExistException("조회된 유저 정보가 없습니다."));
