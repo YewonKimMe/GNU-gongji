@@ -107,12 +107,23 @@ public class UserManageService {
 
         if (findUserToken.isPresent()) {
             findUserToken.get().setToken(newFcmToken);
+            List<String> userTokens = new ArrayList<>();
+            for (UserToken userToken : user.getUserTokens()) {
+                userTokens.add(userToken.getToken());
+            }
+            // FCM Topic 재등록
+            user.getSubList()
+                    .forEach(sub -> fcmService.subscribeTopic(userTokens, Topic.DEPT_TOPIC_PATH.getPath() + sub.getDepartmentId()));
         } else {
             UserToken newUserToken = new UserToken();
             newUserToken.setUser(user);
             newUserToken.setPlatform(device.getDevice());
             newUserToken.setToken(newFcmToken);
             user.getUserTokens().add(newUserToken);
+
+            log.debug("newFcmToken={}", newFcmToken);
+            user.getSubList()
+                    .forEach(sub -> fcmService.subscribeTopic(List.of(newFcmToken), Topic.DEPT_TOPIC_PATH.getPath() + sub.getDepartmentId()));
         }
     }
 
@@ -142,7 +153,8 @@ public class UserManageService {
                     fcmService.unSubscribeTopic(tokens, topic);
                 }
                 // db 삭제
-                findUser.setUserTokens(null);
+                findUser.getUserTokens().clear();
+
             }
             case SPECIFIC -> {
 
@@ -161,6 +173,7 @@ public class UserManageService {
                         findTokenOpt.get().setToken(null);
                         findTokenOpt.get().setUser(null);
                         findUser.getUserTokens().remove(findTokenOpt.get());
+                        findUser.setFcmToken(null);
                     } else {
                         log.error("User token not exist");
                         throw new RuntimeException();
