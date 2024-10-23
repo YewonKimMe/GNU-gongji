@@ -1,6 +1,5 @@
 package site.gnu_gongji.GnuGongji.entity;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -53,5 +52,9 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<UserSub> subList = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "user",fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    private Set<UserToken> userTokens = new HashSet<>();
+
 
 }
