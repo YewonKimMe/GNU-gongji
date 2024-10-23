@@ -3,6 +3,9 @@ package site.gnu_gongji.GnuGongji.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.GoogleCredentials;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+import com.google.firebase.messaging.*;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,7 +44,12 @@ public class FcmService {
                     .createScoped(List.of("https://www.googleapis.com/auth/cloud-platform"));
             this.googleCredentials
                     .refreshIfExpired();
-
+            // Firebase init
+            FirebaseOptions firebaseOption = FirebaseOptions.builder()
+                    .setCredentials(this.googleCredentials)
+                    .build();
+            FirebaseApp.initializeApp(firebaseOption);
+            log.info("Firebase Application Initialized and configured;");
         } catch (IOException e) {
             log.error("[FCM INIT EXCEPTION] message={}", e.getMessage());
             throw new RuntimeException(e.getMessage());
@@ -68,6 +76,48 @@ public class FcmService {
 
 
         return response.getStatusCode() == HttpStatus.OK ? 1 : 0;
+    }
+
+    // firebase 메소드 예외처리 내부에서 하기
+    // 0 또는 갯수 리턴
+    public int subscribeTopic(List<String> tokens, String topic) {
+        try {
+            TopicManagementResponse res = FirebaseMessaging.getInstance().subscribeToTopic(tokens, topic);
+            int successCount = res.getSuccessCount();
+            log.info("[Firebase] FirebaseMessaging topic message send finished; topic={} isAllFinished={}", topic, tokens.size() == successCount);
+            return successCount;
+        } catch (FirebaseMessagingException e) {
+            log.error("Firebase Topic Sub Failed, cause={}", e.getMessage());
+            return 0;
+        }
+    }
+
+    public int unSubscribeTopic(List<String> tokens, String topic) {
+        int successCount = 0;
+        try {
+            TopicManagementResponse res = FirebaseMessaging.getInstance().unsubscribeFromTopic(tokens, topic);
+            successCount = res.getSuccessCount();
+            return successCount;
+        } catch (FirebaseMessagingException e) {
+            log.error("Firebase Topic UnSub Failed, cause={}", e.getMessage());
+            return successCount;
+        }
+    }
+
+    public void sendMessageByTopic(String title, String body, String link, String topic) {
+        Message message = Message.builder()
+                .setTopic(topic)
+                .putData("title", title)
+                .putData("body", body)
+                .putData("link", link)
+                .build();
+        try {
+            String res = FirebaseMessaging.getInstance().send(message);
+            log.info("Successfully sent message to [" + topic + "] topic: " + res);
+        } catch (FirebaseMessagingException e) {
+            log.error("Firebase Topic Message Send Failed, cause={}", e.getMessage());
+        }
+
     }
 
     private String getAccessToken() throws IOException {
