@@ -1,5 +1,6 @@
 package site.gnu_gongji.GnuGongji.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,16 +9,16 @@ import org.springframework.transaction.annotation.Transactional;
 import site.gnu_gongji.GnuGongji.dto.UserCreateDto;
 import site.gnu_gongji.GnuGongji.entity.Authority;
 import site.gnu_gongji.GnuGongji.entity.User;
+import site.gnu_gongji.GnuGongji.entity.UserSub;
+import site.gnu_gongji.GnuGongji.entity.UserToken;
 import site.gnu_gongji.GnuGongji.exception.UserNotExistException;
 import site.gnu_gongji.GnuGongji.repository.UserManageRepository;
-import site.gnu_gongji.GnuGongji.security.oauth2.enums.OAuth2Provider;
+import site.gnu_gongji.GnuGongji.security.oauth2.enums.*;
 import site.gnu_gongji.GnuGongji.security.oauth2.OAuth2UserPrincipal;
-import site.gnu_gongji.GnuGongji.security.oauth2.enums.Role;
+import site.gnu_gongji.GnuGongji.tool.DeviceUtil;
 
 import java.sql.Timestamp;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Transactional
 @RequiredArgsConstructor
@@ -29,6 +30,8 @@ public class UserManageService {
     private int subLimit;
 
     private final UserManageRepository userManageRepository;
+
+    private final FcmService fcmService;
 
     public UserCreateDto createOAuth2User(OAuth2UserPrincipal oAuth2UserPrincipal, String refreshToken) {
 
@@ -92,10 +95,80 @@ public class UserManageService {
                 .orElseThrow(() -> new UserNotExistException("구독, 알림 설정중인 유저가 없습니다."));
     }
 
-    public void updateUserFcmToken(String userOAuth2Id, String newFcmToken) {
+    public void updateUserFcmToken(String userOAuth2Id, String newFcmToken, Device device) {
         User user = userManageRepository.findUserByOAuth2Id(userOAuth2Id)
                 .orElseThrow(() -> new UserNotExistException("해당 ID로 검색된 유저가 없습니다."));
         user.setFcmToken(newFcmToken);
+
+        // 유저 디바이스별 토큰을 등록하거나 새로 추가
+        Optional<UserToken> findUserToken = user.getUserTokens().stream()
+                .filter(token -> token.getPlatform().equals(device.getDevice()))
+                .findFirst();
+
+        if (findUserToken.isPresent()) {
+            findUserToken.get().setToken(newFcmToken);
+        } else {
+            UserToken newUserToken = new UserToken();
+            newUserToken.setUser(user);
+            newUserToken.setPlatform(device.getDevice());
+            newUserToken.setToken(newFcmToken);
+            user.getUserTokens().add(newUserToken);
+        }
+    }
+
+    public void deleteUserFcmToken(String oAuth2Id, String option, HttpServletRequest request) {
+
+        TokenDeleteOption deleteOption = TokenDeleteOption.getOption(option);
+
+        Device deviceInfo = DeviceUtil.getDeviceInfo(request);
+
+        // FCM에서 삭제
+        User findUser = userManageRepository.findUserByOAuth2Id(oAuth2Id)
+                .orElseThrow(() -> new UserNotExistException("해당 ID로 검색된 유저가 없습니다."));
+
+        Set<UserSub> subList = findUser.getSubList();
+
+        switch (deleteOption) {
+            case ALL -> {
+                // fcm 구독 해제 처리
+
+                for (UserSub userSub : subList) {
+                    Long departmentId = userSub.getDepartmentId();
+                    String topic = Topic.DEPT_TOPIC_PATH.getPath() + departmentId;
+                    List<String> tokens = new ArrayList<>();
+                    for (UserToken userToken : findUser.getUserTokens()) {
+                        tokens.add(userToken.getToken());
+                    }
+                    fcmService.unSubscribeTopic(tokens, topic);
+                }
+                // db 삭제
+                findUser.setUserTokens(null);
+            }
+            case SPECIFIC -> {
+
+                for (UserSub userSub : subList) {
+                    String topic = Topic.DEPT_TOPIC_PATH.getPath() + userSub.getDepartmentId();
+
+                    Optional<UserToken> findTokenOpt = findUser.getUserTokens().stream()
+                            .filter(tk -> tk.getPlatform().equals(deviceInfo.getDevice()))
+                            .findFirst();
+                    if (findTokenOpt.isPresent()) {
+                        // fcm 구독 해제 처리
+                        String fcmToken = findTokenOpt.get().getToken();
+                        fcmService.unSubscribeTopic(List.of(fcmToken), topic);
+
+                        // db 삭제
+                        findTokenOpt.get().setToken(null);
+                        findTokenOpt.get().setUser(null);
+                        findUser.getUserTokens().remove(findTokenOpt.get());
+                    } else {
+                        log.error("User token not exist");
+                        throw new RuntimeException();
+                    }
+                }
+
+            }
+        }
     }
 
     public void invalidateFcmToken(String oAuth2Id) {
