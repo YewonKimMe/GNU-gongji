@@ -12,6 +12,7 @@ import site.gnu_gongji.GnuGongji.dto.ScrapResult;
 import site.gnu_gongji.GnuGongji.dto.ScrapResultDto;
 import site.gnu_gongji.GnuGongji.entity.User;
 import site.gnu_gongji.GnuGongji.entity.UserSub;
+import site.gnu_gongji.GnuGongji.security.oauth2.enums.Topic;
 
 import java.io.IOException;
 import java.util.List;
@@ -78,6 +79,29 @@ public class NotificationService {
                         });
             }
         }
+    }
+
+    public void handleNotificationProcessWithTopic(List<ScrapResultDto> scrapResultDtoList) {
+
+        log.debug("[Execute handleNotificationProcess]");
+
+        log.info("[Execute handleNotificationProcess] result_length={}", scrapResultDtoList.size());
+
+        for (ScrapResultDto scrapResultDto : scrapResultDtoList) {
+            List<ScrapResult> scrapResultList = scrapResultDto.getScrapResultList();
+            Long departmentId = scrapResultDto.getDepartmentId();
+
+            for (ScrapResult scrapResult : scrapResultList) {
+
+                String dept_topic = Topic.DEPT_TOPIC_PATH.getPath() + departmentId;
+                /// FCM Topic 기반 알림 발송 함수 호출 ///
+                fcmService.sendMessageByTopic(scrapResult.getDepartmentName(),
+                        scrapResult.getTitle() + " \n(" + scrapResult.getDate() + ")",
+                        scrapResult.getNoticeLink(),
+                        dept_topic);
+            }
+        }
+
     }
 
     public void handleHttpClientErrorExceptionNotFound(HttpClientErrorException.NotFound e, User user) {
