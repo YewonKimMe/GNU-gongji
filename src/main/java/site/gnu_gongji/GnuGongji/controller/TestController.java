@@ -59,12 +59,8 @@ public class TestController {
 
     @PostMapping("/noti-test")
     public ResponseEntity<ResultAndMessage> sendNotification(@RequestBody FcmNotificationDto fcmNotificationDto) {
-        try {
-            int i = fcmService.sendMessage(fcmNotificationDto, false);
-            log.debug("[send result={}]", i);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        int i = fcmService.sendMessage(fcmNotificationDto, false);
+        log.debug("[send result={}]", i);
         return ResponseEntity.ok()
                 .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), "OK"));
     }
