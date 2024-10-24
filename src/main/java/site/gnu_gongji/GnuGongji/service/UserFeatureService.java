@@ -4,24 +4,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpClientErrorException;
-import site.gnu_gongji.GnuGongji.dto.DepartmentDto;
-import site.gnu_gongji.GnuGongji.dto.EmailDto;
-import site.gnu_gongji.GnuGongji.dto.FcmNotificationDto;
-import site.gnu_gongji.GnuGongji.dto.UserInfoDto;
+import site.gnu_gongji.GnuGongji.dto.*;
 import site.gnu_gongji.GnuGongji.entity.User;
 import site.gnu_gongji.GnuGongji.entity.UserSub;
 import site.gnu_gongji.GnuGongji.entity.UserToken;
 import site.gnu_gongji.GnuGongji.exception.*;
 import site.gnu_gongji.GnuGongji.repository.UserFeatureRepository;
+import site.gnu_gongji.GnuGongji.repository.UserManageRepository;
 import site.gnu_gongji.GnuGongji.security.oauth2.enums.Topic;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Transactional
 @RequiredArgsConstructor
@@ -32,6 +25,8 @@ public class UserFeatureService {
     private final DepartmentService departmentService;
 
     private final UserFeatureRepository userFeatureRepository;
+
+    private final UserManageRepository userManageRepository;
 
     private final FcmService fcmService;
 
@@ -149,18 +144,11 @@ public class UserFeatureService {
 
         if (findUser.getFcmToken() == null) return false;
 
-        try {
-            fcmService.sendMessage(
-                    new FcmNotificationDto(findUser.getFcmToken(), "테스트 제목", "테스트 본문", "https://gnu-gongji.pages.dev"),
-                    true
-            );
-            return true;
-        } catch (HttpClientErrorException.NotFound e) {
-            return false;
-        }catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
+        int result = fcmService.sendMessage(
+                new FcmNotificationDto(findUser.getFcmToken(), "테스트 제목", "테스트 본문", "https://gnu-gongji.pages.dev"),
+                true
+        );
+        return result == 1;
     }
 
     public UserInfoDto getUserInfoByOAuthId(String oAuth2Id) {
@@ -177,5 +165,40 @@ public class UserFeatureService {
                 .createDate(formattedDate)
                 .isPushMessagingAgreed(findUser.getFcmToken() != null)
                 .build();
+    }
+    public List<UserTokenStatus> getUserDevicesAndStatus(String oAuth2Id) {
+
+        List<UserTokenStatus> tokenStatuses = new LinkedList<>();
+
+        // 유저와 user_tokens 를 가져와서
+        User user = userManageRepository.findUserByOAuth2Id(oAuth2Id)
+                .orElseThrow(() -> new UserNotExistException("해당 유저로 검색된 계정이 없습니다."));
+
+        Set<UserToken> userTokens = user.getUserTokens();
+
+
+        // fcm 에서 반복하며 유효성을 검사함
+        for (UserToken userToken : userTokens) {
+            FcmNotificationDto fcmNotificationDto = FcmNotificationDto.builder()
+                    .title("test")
+                    .body("test")
+                    .token(userToken.getToken())
+                    .build();
+            int result = fcmService.sendMessage(fcmNotificationDto, true);
+
+            // SimpleDateFormat을 사용하여 포맷 지정
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            String formattedDate = formatter.format(userToken.getAddDate());
+
+            UserTokenStatus status = UserTokenStatus.builder()
+                    .platform(userToken.getPlatform())
+                    .isAvailable(result == 1)
+                    .createDate(formattedDate)
+                    .build();
+
+            // 리스트에 DTO 객체{platform, status, 추가일자}를 추가
+            tokenStatuses.add(status);
+        }
+        return tokenStatuses;
     }
 }
