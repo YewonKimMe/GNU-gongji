@@ -41,6 +41,13 @@ public class UserController {
                 .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
                 .body(new UserTokenStatusDto(isTokenValid));
     }
+    @GetMapping("/devices")
+    public ResponseEntity<ResultAndMessage> getAllUserDeviceAndStatus(Authentication authentication) {
+
+        List<UserTokenStatus> userDevicesAndStatus = userFeatureService.getUserDevicesAndStatus(authentication.getName());
+
+        return ResponseEntity.ok(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), userDevicesAndStatus));
+    }
 
     // 유저 로그아웃 기능
     @PostMapping("/logout")
@@ -98,4 +105,8 @@ public class UserController {
         return ResponseEntity.ok()
                 .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), userSub));
     }
+
+    // 유저 공지 저장(+ 메모)
+
+    // 유저 공지 삭제
 }
