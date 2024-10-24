@@ -13,9 +13,11 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.*;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import site.gnu_gongji.GnuGongji.dto.FcmMessageDto;
 import site.gnu_gongji.GnuGongji.dto.FcmNotificationDto;
+import site.gnu_gongji.GnuGongji.entity.User;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,26 +58,33 @@ public class FcmService {
         }
     }
 
-    public int sendMessage(FcmNotificationDto fcmNotificationDto, boolean isValidateTest) throws IOException {
+    public int sendMessage(FcmNotificationDto fcmNotificationDto, boolean isValidateTest) {
 
         log.debug("[Execute sendMessage]");
 
-        String message = createMessage(fcmNotificationDto, isValidateTest);
+        String message;
 
-        RestTemplate restTemplate = new RestTemplate();
-        restTemplate.getMessageConverters()
-                .add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
+        try {
+            message = createMessage(fcmNotificationDto, isValidateTest);
+            RestTemplate restTemplate = new RestTemplate();
+            restTemplate.getMessageConverters()
+                    .add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "Bearer " + getAccessToken());
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("Authorization", "Bearer " + getAccessToken());
 
-        HttpEntity<String> entity = new HttpEntity<>(message, headers);
+            HttpEntity<String> entity = new HttpEntity<>(message, headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(API_URL, HttpMethod.POST, entity, String.class);
+            ResponseEntity<String> response = restTemplate.exchange(API_URL, HttpMethod.POST, entity, String.class);
 
+            return response.getStatusCode() == HttpStatus.OK ? 1 : 0;
 
-        return response.getStatusCode() == HttpStatus.OK ? 1 : 0;
+        } catch (HttpClientErrorException.NotFound e) {
+            return 0;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // firebase 메소드 예외처리 내부에서 하기
@@ -120,9 +129,13 @@ public class FcmService {
 
     }
 
-    private String getAccessToken() throws IOException {
+    private String getAccessToken() {
 
-        googleCredentials.refreshIfExpired();
+        try {
+            googleCredentials.refreshIfExpired();
+        } catch (IOException e) {
+            log.error("[FCM getAccessToken IOException], cause={}", e.getMessage());
+        }
 
         return googleCredentials.getAccessToken().getTokenValue();
     }
