@@ -64,9 +64,6 @@ public class NotificationService {
                                 //////// FCM Push Message 전송 ////////
                                 try {
                                     fcmService.sendMessage(fcmMessageDto, false);
-                                } catch (IOException e) {
-                                    log.error("[FCM Message Send IOException], cause={}", e.getMessage());
-                                    break;
                                 } catch (HttpClientErrorException.NotFound httpClientErrorException) {
                                     handleHttpClientErrorExceptionNotFound(httpClientErrorException, user);
                                     log.error("[FCM Message Send HttpClientErrorException], cause={}", httpClientErrorException.getMessage());
@@ -83,9 +80,11 @@ public class NotificationService {
 
     public void handleNotificationProcessWithTopic(List<ScrapResultDto> scrapResultDtoList) {
 
+        int sendCount = 0;
+
         log.debug("[Execute handleNotificationProcess]");
 
-        log.info("[Execute handleNotificationProcess] result_length={}", scrapResultDtoList.size());
+        log.info("[Execute handleNotificationProcessWithTopic] resultLength={};", scrapResultDtoList.size());
 
         for (ScrapResultDto scrapResultDto : scrapResultDtoList) {
             List<ScrapResult> scrapResultList = scrapResultDto.getScrapResultList();
@@ -99,9 +98,10 @@ public class NotificationService {
                         scrapResult.getTitle() + " \n(" + scrapResult.getDate() + ")",
                         scrapResult.getNoticeLink(),
                         dept_topic);
+                sendCount += 1;
             }
         }
-
+        log.info("[Terminate handleNotificationProcessWithTopic] resultLength={}; messageCount={};", scrapResultDtoList.size(), sendCount);
     }
 
     public void handleHttpClientErrorExceptionNotFound(HttpClientErrorException.NotFound e, User user) {

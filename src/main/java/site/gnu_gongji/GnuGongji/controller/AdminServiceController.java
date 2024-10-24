@@ -59,12 +59,7 @@ public class AdminServiceController {
     @PostMapping("/firebase-notification-test")
     public ResponseEntity<ResultAndMessage> sendNotification(@RequestBody FcmNotificationDto fcmNotificationDto) {
 
-        try {
-            fcmService.sendMessage(fcmNotificationDto, false);
-        } catch (IOException e) {
-            log.error("[ADMIN_TEST] message={}", e.getMessage());
-            throw new RuntimeException(e);
-        }
+        fcmService.sendMessage(fcmNotificationDto, false);
 
         return ResponseEntity.ok()
                 .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), "전송완료"));
