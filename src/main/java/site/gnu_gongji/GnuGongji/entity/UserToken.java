@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.sql.Timestamp;
+
 @Entity
 @Getter
 @Setter
@@ -23,4 +25,7 @@ public class UserToken {
 
     @Column(name = "token")
     private String token;
+
+    @Column(name = "add_date")
+    private Timestamp addDate;
 }

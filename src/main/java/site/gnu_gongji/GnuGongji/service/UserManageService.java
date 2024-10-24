@@ -107,6 +107,7 @@ public class UserManageService {
 
         if (findUserToken.isPresent()) {
             findUserToken.get().setToken(newFcmToken);
+            findUserToken.get().setAddDate(new Timestamp(System.currentTimeMillis()));
             List<String> userTokens = new ArrayList<>();
             for (UserToken userToken : user.getUserTokens()) {
                 userTokens.add(userToken.getToken());
@@ -119,6 +120,7 @@ public class UserManageService {
             newUserToken.setUser(user);
             newUserToken.setPlatform(device.getDevice());
             newUserToken.setToken(newFcmToken);
+            newUserToken.setAddDate(new Timestamp(System.currentTimeMillis()));
             user.getUserTokens().add(newUserToken);
 
             log.debug("newFcmToken={}", newFcmToken);
