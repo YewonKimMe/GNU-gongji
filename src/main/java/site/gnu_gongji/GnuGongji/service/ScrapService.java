@@ -6,6 +6,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,9 @@ public class ScrapService {
     private final DepartmentService departmentService;
 
     private final NotificationService notificationService;
+
+    @Value("${mycustom.collection-date-range:2}")
+    private int collectionDateRange;
 
     // scrap, 요청 관계 없이 스케줄링으로 처리
     @Scheduled(cron = "${spring.task.scheduling.cron}")
@@ -114,8 +118,8 @@ public class ScrapService {
                         LocalDate parseNoticeLocalDate = getLocalDate(date);
                         LocalDate now = LocalDate.now();
 
-                        // 20일이 지난 공지사항은 제외
-                        if (ChronoUnit.DAYS.between(parseNoticeLocalDate, now) > 20) continue;
+                        // n일이 지난 공지사항은 제외
+                        if (ChronoUnit.DAYS.between(parseNoticeLocalDate, now) > collectionDateRange) continue;
 
                         String title = newNoticeHtml.select("a").first().ownText().trim();
                         String formattedNoticeLinkUrl = String.format(baseNoticeLinkUrl, formattedBaseUrl, mi, bbsId, nttSn);
