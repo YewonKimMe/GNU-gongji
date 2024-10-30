@@ -68,6 +68,7 @@ public class SecurityConfig {
                                             config.setAllowCredentials(true); // cors 요청에서 자격 증명 전송 허용
 
                                             config.setAllowedOrigins(List.of(
+                                                    "http://localhost:3000",
                                                     devCorsAllowedURL,
                                                     prodCorsAllowedURL
                                             ));
@@ -79,9 +80,9 @@ public class SecurityConfig {
                                 .requestMatchers("/api/v1/user/**").hasRole("USER")
                                 .requestMatchers("/api/v1/admin/**", "/api/v1/test/**", "/actuator/**").hasRole("ADMIN")
                                 .requestMatchers("/api/v1/info/**").hasRole("USER")
-                                .requestMatchers("/api/v1/firebase").hasRole("USER")
-                                .requestMatchers("/api/v1/**").permitAll()
-                                .anyRequest().permitAll()
+                                .requestMatchers("/api/v1/firebase/**").hasRole("USER")
+                                .requestMatchers("/oauth2/**", "/login/**").permitAll()
+                                .anyRequest().denyAll()
                 )
                 .oauth2Login(configurer -> configurer.
                         authorizationEndpoint(config -> config.authorizationRequestRepository(oAuth2AuthorizationRequestCookieRepository)).
