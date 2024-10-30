@@ -71,6 +71,7 @@ mycustom:
     prod-url: ${PROD_URL}
   sub-limit: ${SUB_LIMIT}
   admin-password: ${ADMIN_PASSWORD}
+  collection-date-range: ${COLLECTION_DATE_RANGE}
 
 # LOGGING LEVEL
 logging:
