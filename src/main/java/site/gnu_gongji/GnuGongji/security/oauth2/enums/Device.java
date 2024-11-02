@@ -14,6 +14,7 @@ public enum Device {
     private final String device;
 
     public static Device getDevice(String value) {
+        if (value == null) return null;
         for (Device device : values()) {
             if (device.getDevice().equals(value)) {
                 return device;
