@@ -37,12 +37,12 @@ public class FcmController {
     }
 
     @DeleteMapping("/token")
-    public ResponseEntity<ResultAndMessage> deleteFcmToken(@RequestParam(name = "option") String option, Authentication authentication, HttpServletRequest request) {
+    public ResponseEntity<ResultAndMessage> deleteFcmToken(@RequestParam(name = "option") String option, @RequestParam(name = "platform", required = false) String platform,  Authentication authentication, HttpServletRequest request) {
 
         log.debug("[token 삭제 요청] userId={}", authentication.getName());
         log.info("[token 삭제 요청] userId={}", authentication.getName());
 
-        userManageService.deleteUserFcmToken(authentication.getName(), option, request);
+        userManageService.deleteUserFcmToken(authentication.getName(), option, platform);
 
         return ResponseEntity.ok()
                 .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), authentication.getName() + " 계정의 알림 설정이 해지되었습니다."));
