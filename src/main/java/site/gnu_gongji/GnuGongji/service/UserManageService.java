@@ -1,6 +1,5 @@
 package site.gnu_gongji.GnuGongji.service;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,7 +14,6 @@ import site.gnu_gongji.GnuGongji.exception.UserNotExistException;
 import site.gnu_gongji.GnuGongji.repository.UserManageRepository;
 import site.gnu_gongji.GnuGongji.security.oauth2.enums.*;
 import site.gnu_gongji.GnuGongji.security.oauth2.OAuth2UserPrincipal;
-import site.gnu_gongji.GnuGongji.tool.DeviceUtil;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -129,11 +127,11 @@ public class UserManageService {
         }
     }
 
-    public void deleteUserFcmToken(String oAuth2Id, String option, HttpServletRequest request) {
+    public void deleteUserFcmToken(String oAuth2Id, String option, String platform) {
 
         TokenDeleteOption deleteOption = TokenDeleteOption.getOption(option);
 
-        Device deviceInfo = DeviceUtil.getDeviceInfo(request);
+        Device deviceInfo = Device.getDevice(platform);
 
         // FCM에서 삭제
         User findUser = userManageRepository.findUserByOAuth2Id(oAuth2Id)
@@ -144,6 +142,7 @@ public class UserManageService {
         switch (deleteOption) {
             case ALL -> {
                 // fcm 구독 해제 처리
+                log.debug("case ALL");
 
                 for (UserSub userSub : subList) {
                     Long departmentId = userSub.getDepartmentId();
@@ -159,29 +158,32 @@ public class UserManageService {
 
             }
             case SPECIFIC -> {
+                log.debug("case SPECIFIC");
+                /*
+                * 1. userTokens 를 기준으로 반복 시작
+                * 2. userSub 로 2차 반복 시작
+                *
+                * */
+                List<UserToken> tokensToRemove = new ArrayList<>();
+                for (UserToken userToken : findUser.getUserTokens()) {
 
-                for (UserSub userSub : subList) {
-                    String topic = Topic.DEPT_TOPIC_PATH.getPath() + userSub.getDepartmentId();
+                    if (!userToken.getPlatform().trim().equalsIgnoreCase(deviceInfo.getDevice().trim())) continue;
 
-                    Optional<UserToken> findTokenOpt = findUser.getUserTokens().stream()
-                            .filter(tk -> tk.getPlatform().equals(deviceInfo.getDevice()))
-                            .findFirst();
-                    if (findTokenOpt.isPresent()) {
-                        // fcm 구독 해제 처리
-                        String fcmToken = findTokenOpt.get().getToken();
+                    for (UserSub userSub : subList) {
+                        String topic = Topic.DEPT_TOPIC_PATH.getPath() + userSub.getDepartmentId();
+
+                        String fcmToken = userToken.getToken();
                         fcmService.unSubscribeTopic(List.of(fcmToken), topic);
-
-                        // db 삭제
-                        findTokenOpt.get().setToken(null);
-                        findTokenOpt.get().setUser(null);
-                        findUser.getUserTokens().remove(findTokenOpt.get());
-                        findUser.setFcmToken(null);
-                    } else {
-                        log.error("User token not exist");
-                        throw new RuntimeException();
                     }
+                    // db 삭제 - userToken 관계 해소
+                    userToken.setToken(null);
+                    userToken.setUser(null);
+                    tokensToRemove.add(userToken);
+                    // TODO 나중에 제거
+                    findUser.setFcmToken(null);
                 }
-
+                // db 삭제 - 부모 엔티티에서 관계 해소
+                tokensToRemove.forEach(findUser.getUserTokens()::remove);
             }
         }
     }
