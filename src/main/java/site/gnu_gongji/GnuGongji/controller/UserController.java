@@ -41,12 +41,15 @@ public class UserController {
                 .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
                 .body(new UserTokenStatusDto(isTokenValid));
     }
+
     @GetMapping("/devices")
     public ResponseEntity<ResultAndMessage> getAllUserDeviceAndStatus(Authentication authentication) {
 
         List<UserTokenStatus> userDevicesAndStatus = userFeatureService.getUserDevicesAndStatus(authentication.getName());
 
-        return ResponseEntity.ok(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), userDevicesAndStatus));
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
+                .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), userDevicesAndStatus));
     }
 
     // 유저 로그아웃 기능
