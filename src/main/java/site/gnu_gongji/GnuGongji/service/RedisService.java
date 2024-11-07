@@ -15,11 +15,8 @@ public class RedisService {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-    private final ObjectMapper objectMapper;
-
-    // TODO 이게문제네 리스트 생성하고 거기다 또 넣으니 이러지
     public <T> void saveList(String key, List<T> list) {
-        redisTemplate.opsForList().rightPushAll(key, list);
+        redisTemplate.opsForList().rightPushAll(key, list.toArray());
     }
 
     public <T> List<T> getAllListItems(String key, Class<T> cls) {
@@ -27,10 +24,10 @@ public class RedisService {
 
         log.debug("redisResult={}", redisResult);
 
-        if (redisResult == null) return null;
+        if (redisResult == null || redisResult.isEmpty()) return null;
 
-        log.debug("redisResult.get(0)={}", redisResult.get(0));
+        //log.debug("redisResult.get(0)={}", redisResult.get(0));
 
-        return (List<T>) redisResult.get(0);
+        return (List<T>) redisResult;
     }
 }
