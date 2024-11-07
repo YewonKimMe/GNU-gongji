@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import site.gnu_gongji.GnuGongji.dto.DepartmentDto;
 import site.gnu_gongji.GnuGongji.entity.Department;
 import site.gnu_gongji.GnuGongji.repository.DepartmentRepository;
+import site.gnu_gongji.GnuGongji.security.oauth2.enums.RedisConst;
 
 import java.util.List;
 
@@ -17,6 +18,8 @@ import java.util.List;
 public class DepartmentService {
 
     private final DepartmentRepository departmentRepository;
+
+    private final RedisService redisService;
 
     public void saveDepartmentComb(Department department) {
 
@@ -32,7 +35,19 @@ public class DepartmentService {
     }
 
     public List<DepartmentDto> getAllDepartment() {
-        return departmentRepository.getAllDepartment();
+        // redis 에서 key 로 조회 시도
+        List<DepartmentDto> redisFindList = redisService.getAllListItems(RedisConst.DEPARTMENT_DTO.getValue(), DepartmentDto.class);
+
+        log.debug("redisFindList={}", redisFindList);
+
+        // redis 에 캐싱된 데이터가 없으면 저장 후 리턴
+        if (redisFindList == null || redisFindList.isEmpty()) {
+            List<DepartmentDto> allDepartments = departmentRepository.getAllDepartment();
+            redisService.saveList(RedisConst.DEPARTMENT_DTO.getValue(), allDepartments);
+            return allDepartments;
+        }
+
+        return redisFindList;
     }
 
     public boolean checkDepartmentExistByDId(Long departmentId) {
