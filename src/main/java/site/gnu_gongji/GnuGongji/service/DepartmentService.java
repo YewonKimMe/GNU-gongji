@@ -42,6 +42,7 @@ public class DepartmentService {
 
         // redis 에 캐싱된 데이터가 없으면 저장 후 리턴
         if (redisFindList == null || redisFindList.isEmpty()) {
+            log.debug("redisFindList is empty");
             List<DepartmentDto> allDepartments = departmentRepository.getAllDepartment();
             redisService.saveList(RedisConst.DEPARTMENT_DTO.getValue(), allDepartments);
             return allDepartments;
