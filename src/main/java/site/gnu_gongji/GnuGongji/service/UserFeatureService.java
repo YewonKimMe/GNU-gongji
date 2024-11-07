@@ -2,6 +2,7 @@ package site.gnu_gongji.GnuGongji.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.gnu_gongji.GnuGongji.dto.*;
@@ -12,6 +13,7 @@ import site.gnu_gongji.GnuGongji.exception.*;
 import site.gnu_gongji.GnuGongji.repository.UserFeatureRepository;
 import site.gnu_gongji.GnuGongji.repository.UserManageRepository;
 import site.gnu_gongji.GnuGongji.security.oauth2.enums.Topic;
+import site.gnu_gongji.GnuGongji.tool.AESUtil;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -137,18 +139,24 @@ public class UserFeatureService {
         return userFeatureRepository.findDepartmentsByUserOauth2Id(oauth2Id);
     }
 
-    // TODO 수정 필요
     public boolean checkUserFCMToken(String oAuth2Id) {
         User findUser = userFeatureRepository.findUserByOauth2Id(oAuth2Id)
                 .orElseThrow(() -> new UserNotExistException("조회된 유저 정보가 없습니다."));
 
-        if (findUser.getFcmToken() == null) return false;
+        if (findUser.getUserTokens() == null || findUser.getUserTokens().isEmpty()) return false;
 
-        int result = fcmService.sendMessage(
-                new FcmNotificationDto(findUser.getFcmToken(), "테스트 제목", "테스트 본문", "https://gnu-gongji.pages.dev"),
-                true
-        );
-        return result == 1;
+        Set<UserToken> userTokens = findUser.getUserTokens();
+        int tokenNum = userTokens.size();
+        int result = 0;
+
+        for (UserToken userToken : userTokens) {
+            result += fcmService.sendMessage(
+                    new FcmNotificationDto(userToken.getToken(), "테스트 제목", "테스트 본문", "https://gnu-gongji.pages.dev"),
+                    true
+            );
+        }
+
+        return result == tokenNum;
     }
 
     public UserInfoDto getUserInfoByOAuthId(String oAuth2Id) {
