@@ -10,6 +10,9 @@ public class DepartmentDto {
     private String departmentKo;
     private String departmentEng;
 
+    public DepartmentDto() {
+    }
+
     public DepartmentDto(Long departmentId, String departmentKo, String departmentEng) {
         this.departmentId = departmentId;
         this.departmentKo = departmentKo;
