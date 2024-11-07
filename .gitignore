@@ -39,7 +39,7 @@ out/
 # Local Setting
 application.properties
 application.yml
-resources/firebase/
+/src/main/resources/firebase/
 
 # QueryDSL generated QEntity files
 /src/main/generated/site/gnu_gongji/GnuGongji/entity/
