@@ -113,12 +113,13 @@ public class FcmService {
         }
     }
 
-    public void sendMessageByTopic(String title, String body, String link, String topic) {
+    public void sendMessageByTopic(String title, String body, String link, String notificationDate, String topic) {
         Message message = Message.builder()
                 .setTopic(topic)
                 .putData("title", title)
                 .putData("body", body)
                 .putData("link", link)
+                .putData("notificationDate", notificationDate)
                 .build();
         try {
             String res = FirebaseMessaging.getInstance().send(message);
