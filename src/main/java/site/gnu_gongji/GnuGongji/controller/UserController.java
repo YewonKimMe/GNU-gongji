@@ -110,6 +110,42 @@ public class UserController {
     }
 
     // 유저 공지 저장(+ 메모)
+    @PostMapping("/memo-notification")
+    public ResponseEntity<ResultAndMessage> saveNotification(@RequestBody UserMemoNotificationDto userMemoNotificationDto, Authentication authentication) {
+        userFeatureService.saveMemo(userMemoNotificationDto, authentication);
+        return ResponseEntity.ok()
+                .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), "저장되었습니다."));
+    }
 
     // 유저 공지 삭제
+    @DeleteMapping("/memo-notification/{id}")
+    public ResponseEntity<ResultAndMessage> deleteNotification(Authentication authentication, @PathVariable(name = "id") Long id) {
+
+        userFeatureService.deleteUserMemoNotification(id, authentication);
+        return ResponseEntity.ok()
+                .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), "동기화된 공지사항이 삭제되었습니다."));
+    }
+
+    // 유저 공지 메모 수정
+    @PatchMapping("/memo-notification/{id}")
+    public ResponseEntity<ResultAndMessage> updateNotification(Authentication authentication, @PathVariable(name = "id") Long id, @RequestBody UserMemoNotificationDto userMemoNotificationDto) {
+
+        userFeatureService.updateUserMemoNotification(id, userMemoNotificationDto, authentication);
+
+        return ResponseEntity.ok()
+                .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), "메모가 수정되었습니다."));
+    }
+
+    // 유저의 모든 메모
+    @GetMapping("/memo-notifications")
+    public ResponseEntity<ResultAndMessage> getUserMemoNotifications(Authentication authentication) {
+        log.debug("GET /memo-notifications");
+        List<UserMemoNotificationDto> userMemoNotifications = userFeatureService.getUserMemoNotifications(authentication.getName());
+
+        log.debug("GET /memo-notifications, userMemoNotifications={}", userMemoNotifications);
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.maxAge(5, TimeUnit.SECONDS))
+                .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), userMemoNotifications));
+    }
+
 }
