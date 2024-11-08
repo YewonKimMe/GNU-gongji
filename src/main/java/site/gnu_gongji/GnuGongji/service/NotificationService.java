@@ -97,6 +97,7 @@ public class NotificationService {
                 fcmService.sendMessageByTopic(scrapResult.getDepartmentName(),
                         scrapResult.getTitle() + " \n(" + scrapResult.getDate() + ")",
                         scrapResult.getNoticeLink(),
+                        scrapResult.getDate(),
                         dept_topic);
                 sendCount += 1;
             }
