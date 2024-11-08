@@ -112,7 +112,7 @@ public class UserController {
     // 유저 공지 저장(+ 메모)
     @PostMapping("/memo-notification")
     public ResponseEntity<ResultAndMessage> saveNotification(@RequestBody UserMemoNotificationDto userMemoNotificationDto, Authentication authentication) {
-        userFeatureService.saveMemo(userMemoNotificationDto, authentication);
+        userFeatureService.saveUserMemoNotification(userMemoNotificationDto, authentication);
         return ResponseEntity.ok()
                 .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), "저장되었습니다."));
     }
