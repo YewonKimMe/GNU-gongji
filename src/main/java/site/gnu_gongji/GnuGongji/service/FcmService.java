@@ -17,7 +17,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import site.gnu_gongji.GnuGongji.dto.FcmMessageDto;
 import site.gnu_gongji.GnuGongji.dto.FcmNotificationDto;
-import site.gnu_gongji.GnuGongji.entity.User;
 
 import java.io.IOException;
 import java.io.InputStream;
