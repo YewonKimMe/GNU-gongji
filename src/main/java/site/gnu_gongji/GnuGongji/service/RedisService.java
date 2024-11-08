@@ -25,8 +25,6 @@ public class RedisService {
 
         if (redisResult == null || redisResult.isEmpty()) return null;
 
-        //log.debug("redisResult.get(0)={}", redisResult.get(0));
-
         return (List<T>) redisResult;
     }
 }
