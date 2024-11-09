@@ -36,5 +36,7 @@ public class FcmMessageDto {
         private String body;
         private String image;
         private String link;
+        private String notificationDate;
+        private String uuid;
     }
 }
