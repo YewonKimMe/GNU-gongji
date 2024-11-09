@@ -60,8 +60,9 @@ public class AdminServiceController {
     @PostMapping("/firebase-notification-test")
     public ResponseEntity<ResultAndMessage> sendNotification(@RequestBody FcmNotificationDto fcmNotificationDto) {
 
-        fcmNotificationDto.setUuid(UUID.randomUUID().toString());
 
+        fcmNotificationDto.setUuid(UUID.randomUUID().toString());
+        log.debug("fcmNotificationDto: {}", fcmNotificationDto);
         fcmService.sendMessage(fcmNotificationDto, false);
 
         return ResponseEntity.ok()
