@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public interface UserMemoNotificationRepository extends JpaRepository<UserMemoNotification, Long> {
 
-    @Query("select umn from UserMemoNotification umn where umn.userId = :userId")
+    @Query("select umn from UserMemoNotification umn where umn.userId = :userId order by umn.id desc")
     List<UserMemoNotification> getUserMemoNotificationByUserId(@Param("userId") String userId);
 
     @Query("select umn from UserMemoNotification umn WHERE umn.userId = :userId AND umn.id = :id")
@@ -23,4 +23,8 @@ public interface UserMemoNotificationRepository extends JpaRepository<UserMemoNo
     @Modifying
     @Query("delete from UserMemoNotification umn where umn.id = :id AND umn.userId = :userId")
     void deleteUserMemoNotificationByIdAndUserId(@Param("userId") String userId, @Param("id") Long id);
+
+    @Modifying
+    @Query("delete from UserMemoNotification umn where umn.userId = :userId")
+    int deleteAllUserMemoNotificationByIdAndUserId(@Param("userId") String userId);
 }

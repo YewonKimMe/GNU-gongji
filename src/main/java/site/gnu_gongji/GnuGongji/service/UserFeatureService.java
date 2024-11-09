@@ -282,4 +282,8 @@ public class UserFeatureService {
     public void deleteUserMemoNotification(Long id, Authentication authentication) {
         userMemoNotificationRepository.deleteUserMemoNotificationByIdAndUserId(authentication.getName(), id);
     }
+
+    public int deleteAllUserMemoNotifications(String oAuth2Id) {
+        return userMemoNotificationRepository.deleteAllUserMemoNotificationByIdAndUserId(oAuth2Id);
+    }
 }
