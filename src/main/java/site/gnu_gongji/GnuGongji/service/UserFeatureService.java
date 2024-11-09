@@ -16,6 +16,7 @@ import site.gnu_gongji.GnuGongji.repository.UserManageRepository;
 import site.gnu_gongji.GnuGongji.repository.UserMemoNotificationRepository;
 import site.gnu_gongji.GnuGongji.security.oauth2.enums.Topic;
 import site.gnu_gongji.GnuGongji.tool.AESUtil;
+import site.gnu_gongji.GnuGongji.tool.UUIDConverter;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -157,7 +158,7 @@ public class UserFeatureService {
 
         for (UserToken userToken : userTokens) {
             result += fcmService.sendMessage(
-                    new FcmNotificationDto(userToken.getToken(), "테스트 제목", "테스트 본문", "https://gnu-gongji.pages.dev"),
+                    new FcmNotificationDto(userToken.getToken(), "테스트 제목", "테스트 본문", "2024.01.01","https://gnu-gongji.pages.dev", UUID.randomUUID().toString()),
                     true
             );
         }
@@ -217,17 +218,25 @@ public class UserFeatureService {
     }
 
     public void saveUserMemoNotification(UserMemoNotificationDto userMemoNotificationDto, Authentication authentication) {
+
+        Optional<UserMemoNotification> findUmnOpt = userMemoNotificationRepository.findByUUID(UUIDConverter.convertUuidStringToBinary16(userMemoNotificationDto.getUuid()));
+
+        if (findUmnOpt.isPresent()) throw new DuplicationException("이미 동기화(저장)된 공지사항입니다.");
+
         try {
             byte[] encryptMemo = aesUtil.encrypt(userMemoNotificationDto.getMemo());
             UserMemoNotification userMemoNotification = UserMemoNotification.builder()
-                    .encryptedMemo(encryptMemo)
+                    .encryptedMemo(encryptMemo) // 메모 암호화
                     .departmentTitle(userMemoNotificationDto.getDepartmentTitle())
                     .notificationTitle(userMemoNotificationDto.getNotificationTitle())
                     .time(userMemoNotificationDto.getTime())
                     .link(userMemoNotificationDto.getLink())
                     .userId(authentication.getName())
+                    .uuid(UUIDConverter.convertUuidStringToBinary16(userMemoNotificationDto.getUuid()))
                     .build();
+
             userMemoNotificationRepository.save(userMemoNotification);
+
             log.debug("decode AES String={}", aesUtil.decrypt(encryptMemo));
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -249,6 +258,7 @@ public class UserFeatureService {
                                 .memo(aesUtil.decrypt(userMemoNotification.getEncryptedMemo()))
                                 .link(userMemoNotification.getLink())
                                 .time(userMemoNotification.getTime())
+                                .uuid(UUIDConverter.convertBinary16ToUUID(userMemoNotification.getUuid()).toString())
                                 .build();
                         list.add(dto);
                     } catch (Exception e) {
@@ -259,7 +269,7 @@ public class UserFeatureService {
     }
 
     public void updateUserMemoNotification(Long id, UserMemoNotificationDto userMemoNotificationDto, Authentication authentication) {
-        UserMemoNotification userMemoNotification = userMemoNotificationRepository.findByUserId(authentication.getName(), id)
+        UserMemoNotification userMemoNotification = userMemoNotificationRepository.findByUserIdAndId(authentication.getName(), id)
                 .orElseThrow(() -> new MemoNotExistException("해당 유저와 공지사항 ID로 검색된 동기화된 공지사항이 없습니다."));
         try {
             userMemoNotification.setEncryptedMemo(aesUtil.encrypt(userMemoNotificationDto.getMemo()));
