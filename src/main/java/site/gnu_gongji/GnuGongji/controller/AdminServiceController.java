@@ -22,6 +22,7 @@ import site.gnu_gongji.GnuGongji.service.NoticeExcelParser;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -58,6 +59,8 @@ public class AdminServiceController {
 
     @PostMapping("/firebase-notification-test")
     public ResponseEntity<ResultAndMessage> sendNotification(@RequestBody FcmNotificationDto fcmNotificationDto) {
+
+        fcmNotificationDto.setUuid(UUID.randomUUID().toString());
 
         fcmService.sendMessage(fcmNotificationDto, false);
 
