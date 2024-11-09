@@ -31,7 +31,11 @@ public class ExceptionAdvice {
             DuplicateSubscribeException.class,
             NotExistKeyException.class,
             SubscriptionLimitReachedException.class,
-            UserNotExistException.class
+            UserNotExistException.class,
+            DuplicationException.class,
+            MemoNotExistException.class,
+            UserNotExistException.class,
+
     })
     public ResponseEntity<ResultAndMessage> handleMultiException(Exception e) {
 
