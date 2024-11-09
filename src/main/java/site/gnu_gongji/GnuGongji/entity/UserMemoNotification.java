@@ -29,5 +29,5 @@ public class UserMemoNotification {
 
     private byte[] encryptedMemo;
 
-
+    private byte[] uuid;
 }
