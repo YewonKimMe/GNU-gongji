@@ -20,4 +20,6 @@ public class UserMemoNotificationDto {
     private String time; // notificationDate
 
     private String memo;
+
+    private String uuid;
 }
