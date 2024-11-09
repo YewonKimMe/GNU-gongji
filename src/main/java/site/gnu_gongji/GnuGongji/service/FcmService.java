@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -119,6 +120,7 @@ public class FcmService {
                 .putData("body", body)
                 .putData("link", link)
                 .putData("notificationDate", notificationDate)
+                .putData("uuid", UUID.randomUUID().toString())
                 .build();
         try {
             String res = FirebaseMessaging.getInstance().send(message);
@@ -153,6 +155,8 @@ public class FcmService {
                                                 .title(fcmNotificationDto.getTitle())
                                                 .body(fcmNotificationDto.getBody())
                                         .link(fcmNotificationDto.getLink())
+                                        .notificationDate(fcmNotificationDto.getNotificationDate())
+                                        .uuid(fcmNotificationDto.getUuid())
                                                 .image(null).build())
                                 .build()
                 ).validateOnly(isValidateTest).build();
