@@ -59,12 +59,12 @@ public class TokenManger {
             return true;
 
         } catch (UnsupportedJwtException | MalformedJwtException exception) {
-            log.error("JWT is not valid");
+            log.debug("JWT is not valid");
         } catch (SignatureException exception) {
-            log.error("JWT signature validation fails");
+            log.debug("JWT signature validation fails");
         } catch (ExpiredJwtException exception) {
 
-            log.error("JWT is expired");
+            log.debug("JWT is expired");
 
             // jwt 만료 상황
             if (tokenType == TokenType.ACCESS) {
@@ -94,9 +94,9 @@ public class TokenManger {
             }
 
         } catch (IllegalArgumentException exception) {
-            log.error("JWT is null or empty or only whitespace");
+            log.debug("JWT is null or empty or only whitespace");
         } catch (Exception exception) {
-            log.error("JWT validation fails", exception);
+            log.debug("JWT validation fails", exception);
         }
         return false; // SecurityContext.clearContext() -> Exception(501 response)
     }
