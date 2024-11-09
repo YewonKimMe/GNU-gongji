@@ -106,11 +106,12 @@ public class UserController {
         List<DepartmentDto> userSub = userFeatureService.getUserSub(authentication.getName());
 
         return ResponseEntity.ok()
+                .cacheControl(CacheControl.maxAge(3, TimeUnit.SECONDS))
                 .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), userSub));
     }
 
     // 유저 공지 저장(+ 메모)
-    @PostMapping("/memo-notification")
+    @PostMapping("/memo-notifications")
     public ResponseEntity<ResultAndMessage> saveNotification(@RequestBody UserMemoNotificationDto userMemoNotificationDto, Authentication authentication) {
         userFeatureService.saveUserMemoNotification(userMemoNotificationDto, authentication);
         return ResponseEntity.ok()
@@ -118,7 +119,7 @@ public class UserController {
     }
 
     // 유저 공지 삭제
-    @DeleteMapping("/memo-notification/{id}")
+    @DeleteMapping("/memo-notifications/{id}")
     public ResponseEntity<ResultAndMessage> deleteNotification(Authentication authentication, @PathVariable(name = "id") Long id) {
 
         userFeatureService.deleteUserMemoNotification(id, authentication);
@@ -126,8 +127,18 @@ public class UserController {
                 .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), "동기화된 공지사항이 삭제되었습니다."));
     }
 
+    // 유저 공지 모두 삭제
+    @DeleteMapping("/memo-notifications")
+    public ResponseEntity<ResultAndMessage> deleteAllNotification(Authentication authentication) {
+
+        int cnt = userFeatureService.deleteAllUserMemoNotifications(authentication.getName());
+
+        return ResponseEntity.ok()
+                .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), "동기화된 공지사항 " + cnt + "개가 모두 삭제되었습니다."));
+    }
+
     // 유저 공지 메모 수정
-    @PatchMapping("/memo-notification/{id}")
+    @PatchMapping("/memo-notifications/{id}")
     public ResponseEntity<ResultAndMessage> updateNotification(Authentication authentication, @PathVariable(name = "id") Long id, @RequestBody UserMemoNotificationDto userMemoNotificationDto) {
 
         userFeatureService.updateUserMemoNotification(id, userMemoNotificationDto, authentication);
@@ -144,7 +155,7 @@ public class UserController {
 
         log.debug("GET /memo-notifications, userMemoNotifications={}", userMemoNotifications);
         return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(5, TimeUnit.SECONDS))
+                .cacheControl(CacheControl.maxAge(2, TimeUnit.SECONDS))
                 .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), userMemoNotifications));
     }
 
