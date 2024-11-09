@@ -74,8 +74,13 @@ public class UserManageService {
         return userOptional.isPresent();
     }
 
+    // 유저 탈퇴 함수
     public boolean deleteOAuth2User(String oauth2Id, OAuth2Provider provider) {
 
+        // 유저 메모 제거
+        userManageRepository.deleteUserMemo(oauth2Id);
+
+        // 유저 정보 및 연계된 모든 정보 제거
         return userManageRepository.deleteUser(oauth2Id, provider.getRegistrationId());
     }
 

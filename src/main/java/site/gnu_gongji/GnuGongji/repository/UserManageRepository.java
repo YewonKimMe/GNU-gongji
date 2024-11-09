@@ -17,6 +17,8 @@ public interface UserManageRepository {
 
     boolean deleteUser(String id, String providerName);
 
+    void deleteUserMemo(String id);
+
     boolean updateRefreshToke(String oauth2Id, String oauth2Provider, String newRefreshToken);
 
     Optional<List<User>> findUsersWithActiveSubscriptionsAndNotifications();

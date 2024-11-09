@@ -6,6 +6,7 @@ import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import site.gnu_gongji.GnuGongji.entity.QUser;
+import site.gnu_gongji.GnuGongji.entity.QUserMemoNotification;
 import site.gnu_gongji.GnuGongji.entity.User;
 
 import java.util.List;
@@ -96,6 +97,19 @@ public class UserManageRepositoryImpl implements UserManageRepository {
                 .where(builder)
                 .execute();
         return result > 0;
+    }
+
+    @Override
+    public void deleteUserMemo(String id) {
+
+        QUserMemoNotification notification = QUserMemoNotification.userMemoNotification;
+        BooleanBuilder builder = new BooleanBuilder();
+
+        builder.and(notification.userId.eq(id));
+
+        queryFactory.delete(notification)
+                .where(builder)
+                .execute();
     }
 
     @Override
