@@ -15,7 +15,10 @@ public interface UserMemoNotificationRepository extends JpaRepository<UserMemoNo
     List<UserMemoNotification> getUserMemoNotificationByUserId(@Param("userId") String userId);
 
     @Query("select umn from UserMemoNotification umn WHERE umn.userId = :userId AND umn.id = :id")
-    Optional<UserMemoNotification> findByUserId(@Param("userId") String userId, @Param("id") Long id);
+    Optional<UserMemoNotification> findByUserIdAndId(@Param("userId") String userId, @Param("id") Long id);
+
+    @Query("select umn from UserMemoNotification umn WHERE umn.uuid = :uuid")
+    Optional<UserMemoNotification> findByUUID(@Param("uuid") byte[] uuid);
 
     @Modifying
     @Query("delete from UserMemoNotification umn where umn.id = :id AND umn.userId = :userId")
