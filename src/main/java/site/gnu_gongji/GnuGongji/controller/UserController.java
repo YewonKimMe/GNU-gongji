@@ -38,7 +38,7 @@ public class UserController {
         boolean isTokenValid = userFeatureService.checkUserFCMToken(authentication.getName());
 
         return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
+                .cacheControl(CacheControl.maxAge(1, TimeUnit.SECONDS))
                 .body(new UserTokenStatusDto(isTokenValid));
     }
 
@@ -48,7 +48,7 @@ public class UserController {
         List<UserTokenStatus> userDevicesAndStatus = userFeatureService.getUserDevicesAndStatus(authentication.getName());
 
         return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
+                .cacheControl(CacheControl.maxAge(1, TimeUnit.SECONDS))
                 .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), userDevicesAndStatus));
     }
 
