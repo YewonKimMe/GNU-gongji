@@ -233,6 +233,7 @@ public class UserFeatureService {
                     .link(userMemoNotificationDto.getLink())
                     .userId(authentication.getName())
                     .uuid(UUIDConverter.convertUuidStringToBinary16(userMemoNotificationDto.getUuid()))
+                    .hexColor(userMemoNotificationDto.getHexColor())
                     .build();
 
             userMemoNotificationRepository.save(userMemoNotification);
@@ -259,6 +260,7 @@ public class UserFeatureService {
                                 .link(userMemoNotification.getLink())
                                 .time(userMemoNotification.getTime())
                                 .uuid(UUIDConverter.convertBinary16ToUUID(userMemoNotification.getUuid()).toString())
+                                .hexColor(userMemoNotification.getHexColor())
                                 .build();
                         list.add(dto);
                     } catch (Exception e) {
@@ -272,7 +274,17 @@ public class UserFeatureService {
         UserMemoNotification userMemoNotification = userMemoNotificationRepository.findByUserIdAndId(authentication.getName(), id)
                 .orElseThrow(() -> new MemoNotExistException("해당 유저와 공지사항 ID로 검색된 동기화된 공지사항이 없습니다."));
         try {
-            userMemoNotification.setEncryptedMemo(aesUtil.encrypt(userMemoNotificationDto.getMemo()));
+
+            // 메모가 변경된 경우에만 query
+            if (!userMemoNotificationDto.getMemo().equals(aesUtil.decrypt(userMemoNotification.getEncryptedMemo()))) {
+                userMemoNotification.setEncryptedMemo(aesUtil.encrypt(userMemoNotificationDto.getMemo()));
+            }
+
+            // 색상이 변경된 경우에만 query
+            if (!userMemoNotificationDto.getHexColor().equals(userMemoNotification.getHexColor())) {
+                userMemoNotification.setHexColor(userMemoNotificationDto.getHexColor());
+            }
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

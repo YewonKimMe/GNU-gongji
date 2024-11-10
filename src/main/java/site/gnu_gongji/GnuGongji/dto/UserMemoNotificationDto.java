@@ -22,4 +22,6 @@ public class UserMemoNotificationDto {
     private String memo;
 
     private String uuid;
+
+    private String hexColor;
 }
