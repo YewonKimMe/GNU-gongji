@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  spring-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gnu-gongji-container
+    ports:
+      - "8080:8080"
+    env_file:
+      - gnu-gongji.env
+    depends_on:
+      - redis
+    environment:
+      - TZ=Asia/Seoul
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
