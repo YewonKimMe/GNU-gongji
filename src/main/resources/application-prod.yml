@@ -13,7 +13,7 @@ spring:
     password: ${DB_PASSWORD}
   data:
     redis:
-      host: localhost
+      host: ${REDIS_HOST}
       port: 6379
   jpa:
     show-sql: false # SQL 쿼리 출력 비활성화
@@ -83,6 +83,8 @@ aes:
 logging:
   level:
     site: ${LOG_LEVEL}
+    org.springframework.data.redis: ${REDIS_LOG_LEVEL}
+    io.lettuce.core: ${REDIS_LETTUCE_LOG_LEVEL}
 
 firebase:
   api-url: ${FIREBASE_API_URL}
