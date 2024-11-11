@@ -93,10 +93,13 @@ public class FcmService {
         try {
             TopicManagementResponse res = FirebaseMessaging.getInstance().subscribeToTopic(tokens, topic);
             int successCount = res.getSuccessCount();
-            log.info("[Firebase] FirebaseMessaging topic subscribe finished; topic={}; isAllFinished={}", topic, tokens.size() == successCount);
+
+            log.debug("[Firebase] FirebaseMessaging topic subscribe finished; topic={}; isAllFinished={}", topic, tokens.size() == successCount);
+
             return successCount;
         } catch (FirebaseMessagingException e) {
-            log.error("Firebase Topic Sub Failed, cause={}", e.getMessage());
+
+            log.debug("Firebase Topic Sub Failed, cause={}", e.getMessage());
             return 0;
         }
     }
@@ -108,7 +111,7 @@ public class FcmService {
             successCount = res.getSuccessCount();
             return successCount;
         } catch (FirebaseMessagingException e) {
-            log.error("Firebase Topic UnSub Failed, cause={}", e.getMessage());
+            log.debug("Firebase Topic UnSub Failed, cause={}", e.getMessage());
             return successCount;
         }
     }
