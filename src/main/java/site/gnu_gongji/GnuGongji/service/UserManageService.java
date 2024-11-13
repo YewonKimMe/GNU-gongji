@@ -110,13 +110,25 @@ public class UserManageService {
                 .filter(token -> token.getPlatform().equals(device.getDevice()))
                 .findFirst();
 
-        if (findUserToken.isPresent()) {
+        if (findUserToken.isPresent()) { // 기존 플랫폼 토큰이 존재하는 경우
+
+            // 구독 리스트에 대해서 기존 플랫폼 토큰을 구독 해제 처리
+            user.getSubList()
+                            .forEach(sub -> fcmService
+                                    .unSubscribeTopic(
+                                            List.of(findUserToken.get().getToken()),
+                                            Topic.DEPT_TOPIC_PATH.getPath() + sub.getDepartmentId()
+                                    )
+                            );
+
+
             findUserToken.get().setToken(newFcmToken);
             findUserToken.get().setAddDate(new Timestamp(System.currentTimeMillis()));
             List<String> userTokens = new ArrayList<>();
             for (UserToken userToken : user.getUserTokens()) {
                 userTokens.add(userToken.getToken());
             }
+
             // FCM Topic 재등록
             user.getSubList()
                     .forEach(sub -> fcmService.subscribeTopic(userTokens, Topic.DEPT_TOPIC_PATH.getPath() + sub.getDepartmentId()));
