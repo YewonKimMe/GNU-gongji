@@ -1,4 +1,4 @@
-package site.gnu_gongji.GnuGongji.security.oauth2.enums;
+package site.gnu_gongji.GnuGongji.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

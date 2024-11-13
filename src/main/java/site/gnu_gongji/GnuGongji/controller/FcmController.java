@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import site.gnu_gongji.GnuGongji.dto.FcmTokenDto;
 import site.gnu_gongji.GnuGongji.dto.response.ResultAndMessage;
 import site.gnu_gongji.GnuGongji.dto.response.SuccessResultAndMessage;
-import site.gnu_gongji.GnuGongji.security.oauth2.enums.Device;
+import site.gnu_gongji.GnuGongji.enums.Device;
 import site.gnu_gongji.GnuGongji.service.UserManageService;
 import site.gnu_gongji.GnuGongji.tool.DeviceUtil;
 

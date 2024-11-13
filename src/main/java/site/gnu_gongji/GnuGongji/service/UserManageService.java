@@ -10,6 +10,8 @@ import site.gnu_gongji.GnuGongji.entity.Authority;
 import site.gnu_gongji.GnuGongji.entity.User;
 import site.gnu_gongji.GnuGongji.entity.UserSub;
 import site.gnu_gongji.GnuGongji.entity.UserToken;
+import site.gnu_gongji.GnuGongji.enums.Device;
+import site.gnu_gongji.GnuGongji.enums.Topic;
 import site.gnu_gongji.GnuGongji.exception.UserNotExistException;
 import site.gnu_gongji.GnuGongji.repository.UserManageRepository;
 import site.gnu_gongji.GnuGongji.security.oauth2.enums.*;

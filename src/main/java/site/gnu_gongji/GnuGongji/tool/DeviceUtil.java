@@ -2,7 +2,7 @@ package site.gnu_gongji.GnuGongji.tool;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import site.gnu_gongji.GnuGongji.security.oauth2.enums.Device;
+import site.gnu_gongji.GnuGongji.enums.Device;
 
 @Slf4j
 public class DeviceUtil {

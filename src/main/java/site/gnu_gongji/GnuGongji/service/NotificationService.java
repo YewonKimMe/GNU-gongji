@@ -12,7 +12,7 @@ import site.gnu_gongji.GnuGongji.dto.ScrapResult;
 import site.gnu_gongji.GnuGongji.dto.ScrapResultDto;
 import site.gnu_gongji.GnuGongji.entity.User;
 import site.gnu_gongji.GnuGongji.entity.UserSub;
-import site.gnu_gongji.GnuGongji.security.oauth2.enums.Topic;
+import site.gnu_gongji.GnuGongji.enums.Topic;
 
 import java.io.IOException;
 import java.util.List;

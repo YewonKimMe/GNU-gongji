@@ -14,7 +14,7 @@ import site.gnu_gongji.GnuGongji.exception.*;
 import site.gnu_gongji.GnuGongji.repository.UserFeatureRepository;
 import site.gnu_gongji.GnuGongji.repository.UserManageRepository;
 import site.gnu_gongji.GnuGongji.repository.UserMemoNotificationRepository;
-import site.gnu_gongji.GnuGongji.security.oauth2.enums.Topic;
+import site.gnu_gongji.GnuGongji.enums.Topic;
 import site.gnu_gongji.GnuGongji.tool.AESUtil;
 import site.gnu_gongji.GnuGongji.tool.UUIDConverter;
 

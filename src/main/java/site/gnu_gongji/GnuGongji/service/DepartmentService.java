@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import site.gnu_gongji.GnuGongji.dto.DepartmentDto;
 import site.gnu_gongji.GnuGongji.entity.Department;
 import site.gnu_gongji.GnuGongji.repository.DepartmentRepository;
-import site.gnu_gongji.GnuGongji.security.oauth2.enums.RedisConst;
+import site.gnu_gongji.GnuGongji.enums.RedisConst;
 
 import java.util.List;
 
