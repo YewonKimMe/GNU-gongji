@@ -96,9 +96,9 @@ public class UserManageService {
                     userTokens.add(userToken.getToken());
                 }
 
-                user.getSubList().forEach(sub -> {
-                    fcmService.unSubscribeTopic(userTokens, Topic.DEPT_TOPIC_PATH.getPath() + sub.getDepartmentId());
-                });
+                user.getSubList().forEach(sub ->
+                    fcmService.unSubscribeTopic(userTokens, Topic.DEPT_TOPIC_PATH.getPath() + sub.getDepartmentId())
+                );
             }
 
         }
