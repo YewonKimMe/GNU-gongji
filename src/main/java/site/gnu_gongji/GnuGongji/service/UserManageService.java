@@ -82,6 +82,27 @@ public class UserManageService {
         // 유저 메모 제거
         userManageRepository.deleteUserMemo(oauth2Id);
 
+        // 탈퇴 시 구독이 남아있는 경우 토큰들에 대해서 topic 구독 해제
+        User user = userManageRepository.findUserByOauth2IdAndOAuth2Provider(oauth2Id, provider.getRegistrationId())
+                .orElseThrow(() -> new UserNotExistException("해당 ID로 검색된 유저가 없습니다."));
+
+        if (!user.getSubList().isEmpty()) { // 구독목록이 존재하는 경우 == 해당 부서에 대해서 알림이 등록되어 있음
+
+            if (!user.getUserTokens().isEmpty()) { // 기기 토큰이 하나라도 존재하는 경우
+
+                List<String> userTokens = new ArrayList<>();
+
+                for (UserToken userToken : user.getUserTokens()) {
+                    userTokens.add(userToken.getToken());
+                }
+
+                user.getSubList().forEach(sub -> {
+                    fcmService.unSubscribeTopic(userTokens, Topic.DEPT_TOPIC_PATH.getPath() + sub.getDepartmentId());
+                });
+            }
+
+        }
+
         // 유저 정보 및 연계된 모든 정보 제거
         return userManageRepository.deleteUser(oauth2Id, provider.getRegistrationId());
     }
