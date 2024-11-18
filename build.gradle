@@ -65,6 +65,11 @@ dependencies {
 	//엑셀 파싱
 	implementation 'org.apache.poi:poi:5.2.3'
 	implementation 'org.apache.poi:poi-ooxml:5.2.3'
+
+	//slack-api-client
+	// https://mvnrepository.com/artifact/com.slack.api/slack-api-client
+	implementation group: 'com.slack.api', name: 'slack-api-client', version: '1.44.1'
+
 }
 
 tasks.named('test') {
