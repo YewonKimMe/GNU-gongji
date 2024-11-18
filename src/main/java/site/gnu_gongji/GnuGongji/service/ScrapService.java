@@ -1,7 +1,8 @@
 package site.gnu_gongji.GnuGongji.service;
 
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -33,6 +34,8 @@ public class ScrapService {
 
     private final NotificationService notificationService;
 
+    private final SlackService slackService;
+
     @Value("${mycustom.collection-date-range:2}")
     private int collectionDateRange;
 
@@ -44,6 +47,8 @@ public class ScrapService {
 
         // 스크랩 결과 저장 자료구조 추가
         List<ScrapResultDto> resultList = new ArrayList<>();
+
+        List<ScrapFailedDto> failedList = new ArrayList<>();
 
         String baseUrl = "https://www.gnu.ac.kr/%s/na/ntt/";
 
@@ -144,8 +149,14 @@ public class ScrapService {
                     }
                 } catch (IOException e) {
                     log.error("[SCRAP IOException] department={}, dept_url={}", department.getDepartmentKo(), formattedNoticeUrl);
+
+                    ScrapFailedDto scrapFailedDto = getScrapFailedDto(department, departmentKo, mi, bbsId, formattedNoticeUrl, "I/O Exception");
+                    failedList.add(scrapFailedDto);
                 } catch (Exception e) {
                     log.error("[SCRAP Exception] cause={}, department={}, dept_url={}", e.getMessage(), department.getDepartmentKo(), formattedNoticeUrl);
+
+                    ScrapFailedDto scrapFailedDto = getScrapFailedDto(department, departmentKo, mi, bbsId, formattedNoticeUrl, "Exception");
+                    failedList.add(scrapFailedDto);
                 }
 
             }
@@ -162,6 +173,34 @@ public class ScrapService {
             notificationService
                     .handleNotificationProcessWithTopic(resultList);
         }
+
+        // SLACK 으로 결과 전송
+        if (!resultList.isEmpty() || !failedList.isEmpty()) {
+            slackService.sendScrapResultMessage(resultList, failedList);
+        }
+    }
+
+    @NotNull
+    private static ScrapFailedDto getScrapFailedDto(Department department, String departmentKo, int mi, int bbsId, String formattedNoticeUrl, String reason) {
+        return new ScrapFailedDto(departmentKo, department.getDepartmentEng(), mi, bbsId, formattedNoticeUrl, reason);
+    }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    public static class ScrapFailedDto {
+
+        private String departmentKo;
+
+        private String departmentEng;
+
+        private int mi;
+
+        private int bbsId;
+
+        private String formattedNoticeLinkUrl;
+
+        private String reason;
     }
 
     private static LocalDate getLocalDate(String date) {
