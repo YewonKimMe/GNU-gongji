@@ -90,6 +90,10 @@ firebase:
   api-url: ${FIREBASE_API_URL}
   json-directory: ${FIREBASE_JSON_DIRECTORY}
 
+slack:
+  webhook:
+    url: ${SLACK_WEBHOOK_URL}
+
 management:
   endpoints:
     web:
