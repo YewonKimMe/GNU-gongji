@@ -176,6 +176,7 @@ public class ScrapService {
 
         // SLACK 으로 결과 전송
         if (!resultList.isEmpty() || !failedList.isEmpty()) {
+            log.debug("[CALL SLACK MESSAGING], resultList.length={}, failedList.length={}", resultList.size(), failedList.size());
             slackService.sendScrapResultMessage(resultList, failedList);
         }
     }
