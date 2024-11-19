@@ -4,7 +4,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -19,6 +21,7 @@ import site.gnu_gongji.GnuGongji.entity.Department;
 import site.gnu_gongji.GnuGongji.service.DepartmentService;
 import site.gnu_gongji.GnuGongji.service.FcmService;
 import site.gnu_gongji.GnuGongji.service.NoticeExcelParser;
+import site.gnu_gongji.GnuGongji.service.SlackService;
 
 import java.io.IOException;
 import java.util.List;
@@ -36,6 +39,8 @@ public class AdminServiceController {
     private final DepartmentService departmentService;
 
     private final FcmService fcmService;
+
+    private final SlackService slackService;
 
     @Operation(summary = "부서 엑셀 파일 등록", description = "부서 엑셀 파일을 등록하는 API")
     @PostMapping(value = "/excel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -68,5 +73,20 @@ public class AdminServiceController {
         return ResponseEntity.ok()
                 .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), "전송완료"));
 
+    }
+
+    @PostMapping("/slack-message-send")
+    public ResponseEntity<ResultAndMessage> sendSlackMessage(@RequestBody SlackMessageDto messageDto) {
+
+        slackService.sendSimpleTextMessage(messageDto.text);
+
+        return ResponseEntity.ok()
+                .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), "슬랙 채널로 메세지 발송 완료"));
+    }
+
+    @Getter
+    @Setter
+    private static class SlackMessageDto {
+        private String text;
     }
 }
