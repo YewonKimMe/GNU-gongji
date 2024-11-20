@@ -35,6 +35,7 @@ public class ExceptionAdvice {
             DuplicationException.class,
             MemoNotExistException.class,
             UserNotExistException.class,
+            NeedDeviceTokenException.class
 
     })
     public ResponseEntity<ResultAndMessage> handleMultiException(Exception e) {
