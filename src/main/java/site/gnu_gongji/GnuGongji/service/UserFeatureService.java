@@ -63,6 +63,10 @@ public class UserFeatureService {
 
         User findUser = findUserOpt.get();
 
+        if (findUser.getUserTokens().isEmpty()) {
+            throw new NeedDeviceTokenException("디바이스 알림 수신 허용 이후에 구독이 가능합니다.");
+        }
+
         // userSub 에 해당 deptId 존재 여부 체크(중복 방지)
         findUser.getSubList()
                 .stream()
