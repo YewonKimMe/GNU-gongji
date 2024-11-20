@@ -87,6 +87,20 @@ public class FcmService {
         }
     }
 
+    public int isTokenValid(String token) {
+        log.debug("[Execute isTokenValid]");
+
+        Message message = Message.builder()
+                .setToken(token)
+                .build();
+        try {
+            FirebaseMessaging.getInstance().send(message, true);
+            return 1;
+        } catch (FirebaseMessagingException e) {
+            return 0;
+        }
+    }
+
     // firebase 메소드 예외처리 내부에서 하기
     // 0 또는 갯수 리턴
     public int subscribeTopic(List<String> tokens, String topic) {
