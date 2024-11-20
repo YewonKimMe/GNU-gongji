@@ -157,10 +157,13 @@ public class UserFeatureService {
         int result = 0;
 
         for (UserToken userToken : userTokens) {
-            result += fcmService.sendMessage(
-                    new FcmNotificationDto(userToken.getToken(), "테스트 제목", "테스트 본문", "2024.01.01","https://gnu-gongji.pages.dev", UUID.randomUUID().toString()),
-                    true
-            );
+
+            result += fcmService.isTokenValid(userToken.getToken());
+
+//            result += fcmService.sendMessage(
+//                    new FcmNotificationDto(userToken.getToken(), "테스트 제목", "테스트 본문", "2024.01.01","https://gnu-gongji.pages.dev", UUID.randomUUID().toString()),
+//                    true
+//            );
         }
 
         return result == tokenNum;
@@ -194,12 +197,14 @@ public class UserFeatureService {
 
         // fcm 에서 반복하며 유효성을 검사함
         for (UserToken userToken : userTokens) {
-            FcmNotificationDto fcmNotificationDto = FcmNotificationDto.builder()
-                    .title("test")
-                    .body("test")
-                    .token(userToken.getToken())
-                    .build();
-            int result = fcmService.sendMessage(fcmNotificationDto, true);
+//            FcmNotificationDto fcmNotificationDto = FcmNotificationDto.builder()
+//                    .title("test")
+//                    .body("test")
+//                    .token(userToken.getToken())
+//                    .build();
+//            int result = fcmService.sendMessage(fcmNotificationDto, true);
+
+            int result = fcmService.isTokenValid(userToken.getToken());
 
             // SimpleDateFormat을 사용하여 포맷 지정
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
