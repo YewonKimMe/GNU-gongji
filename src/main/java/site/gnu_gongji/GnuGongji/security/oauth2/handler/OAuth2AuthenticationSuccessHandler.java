@@ -97,11 +97,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         ObjectMapper objectMapper = new ObjectMapper();
 
-        log.info("email={}, name={}, nickname={}, accessToken={}", oAuth2UserPrincipal.getUserInfo().getEmail(),
-                oAuth2UserPrincipal.getUserInfo().getName(),
-                oAuth2UserPrincipal.getUserInfo().getNickname(),
-                oAuth2UserPrincipal.getUserInfo().getAccessToken()
-        );
+        log.info("email={}", oAuth2UserPrincipal.getUserInfo().getEmail());
 
         // 토큰 생성, ROLE 추가
         String accessToken = tokenManger.createJwtToken(authentication, oAuth2UserPrincipal, TokenType.ACCESS, TokenDurationTime.ACCESS);
