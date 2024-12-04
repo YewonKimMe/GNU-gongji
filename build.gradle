@@ -70,6 +70,10 @@ dependencies {
 	// https://mvnrepository.com/artifact/com.slack.api/slack-api-client
 	implementation group: 'com.slack.api', name: 'slack-api-client', version: '1.44.1'
 	implementation 'com.slack.api:slack-api-model:1.44.1'
+
+	// AWS
+	implementation platform("io.awspring.cloud:spring-cloud-aws-dependencies:3.0.1")
+	implementation 'io.awspring.cloud:spring-cloud-aws-starter-sqs'
 }
 
 tasks.named('test') {
