@@ -38,29 +38,20 @@ public class SlackService {
 
     private final Slack slack = Slack.getInstance();
 
-    public void sendSimpleTextMessage(String text) {
+    public void sendSimpleTextMessage(String text, String title, boolean flag) {
 
-        //Payload payload = Payload.builder().text(text).build();
         // 녹색 attachment 생성
         Attachment greenAttachment = Attachment.builder()
-                .color("good")  // "good"은 녹색을 나타냅니다
-                .title("성공 메시지")
-                .text("작업이 성공적으로 완료되었습니다.\n작업이 성공적으로 완료되었습니다.\n작업이 성공적으로 완료되었습니다.\n")
+                .color(flag ? "good" : "danger")  // "good"은 녹색을 나타냅니다
+                .title(title)
+                .text(text)
                 .fallback("작업 성공")
-                .build();
-
-        // 빨간색 attachment 생성
-        Attachment redAttachment = Attachment.builder()
-                .color("danger")  // "danger"는 빨간색을 나타냅니다
-                .title("실패 메시지")
-                .text("작업 중 오류가 발생했습니다.")
-                .fallback("작업 실패")
                 .build();
 
         // Payload 생성 및 attachment 추가
         Payload payload = Payload.builder()
-                .text("@channel " + "GNU 공지 BOT: 작업 결과 보고")
-                .attachments(Arrays.asList(greenAttachment, redAttachment))
+                .text("<@channel> " + title)
+                .attachments(Arrays.asList(greenAttachment))
                 .build();
         try {
             slack.send(slackWebhookUrl, payload);
