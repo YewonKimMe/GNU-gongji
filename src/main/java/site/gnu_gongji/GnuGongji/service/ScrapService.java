@@ -12,10 +12,12 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.gnu_gongji.GnuGongji.dto.ScrapNotification;
 import site.gnu_gongji.GnuGongji.dto.ScrapResult;
 import site.gnu_gongji.GnuGongji.dto.ScrapResultDto;
 import site.gnu_gongji.GnuGongji.entity.Department;
 import site.gnu_gongji.GnuGongji.entity.DepartmentNoticeInfo;
+import site.gnu_gongji.GnuGongji.enums.Topic;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -38,6 +40,10 @@ public class ScrapService {
 
     @Value("${mycustom.collection-date-range:2}")
     private int collectionDateRange;
+
+    private boolean sqsStatus = false; // 기본값은 false
+
+    private final AwsSqsSender awsSqsSender;
 
     // scrap, 요청 관계 없이 스케줄링으로 처리
     @Scheduled(cron = "${spring.task.scheduling.cron}")
@@ -140,7 +146,19 @@ public class ScrapService {
                                 .date(date)
                                 .noticeLink(formattedNoticeLinkUrl)
                                 .build();
-                        scrapResultDto.getScrapResultList().add(scrapResult);
+
+                        // sqs check, sqs가 정상 상태라면 scrapResultDto 에 scrapResult 가 들어가지 않음
+                        if (sqsStatus) {
+                            // SQS 에 전송 시도
+                            ScrapNotification sqsMessage = ScrapNotification.of(scrapResult, Topic.DEPT_TOPIC_PATH.getPath() + department.getDepartmentId());
+                            boolean result = awsSqsSender.sendScrapNotification(sqsMessage);
+
+                            // result == false -> 메세지 전송 실패, 로컬 메세지 전송 함수를 이용하기 위해 기존 리스트에 추가
+                            if (!result) scrapResultDto.getScrapResultList().add(scrapResult);
+                        } else {
+                            // else
+                            scrapResultDto.getScrapResultList().add(scrapResult);
+                        }
                     }
                     //nttSnList.sort(Collections.reverseOrder()); // lastNttSn 저장
                     if (!nttSnSet.isEmpty()) { // 공지사항이 스크랩된 경우 == Set 이 비어있지 않은 경우
@@ -208,5 +226,10 @@ public class ScrapService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
 
         return LocalDate.parse(date, formatter);
+    }
+
+    public void setSqsStatus(boolean status) {
+        this.sqsStatus = status;
+        slackService.sendSimpleTextMessage("AWS SQS-" + awsSqsSender.getSimpleServiceQueueName() + " 상태가 업데이트 되었습니다. \n현재 SQS status flag=" + this.sqsStatus + "\n알림 작업 서버 상태: " + (this.sqsStatus ? "이용 가능" : "이용 불가"), "알림 작업 서버 활성화 신호 수신", this.sqsStatus);
     }
 }
