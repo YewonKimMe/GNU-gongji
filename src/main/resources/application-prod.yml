@@ -76,6 +76,8 @@ mycustom:
   sub-limit: ${SUB_LIMIT}
   admin-password: ${ADMIN_PASSWORD}
   collection-date-range: ${COLLECTION_DATE_RANGE}
+  sqs-update-secret: ${SQS_UPDATE_SECRET}
+
 aes:
   aes-key: ${AES_KEY}
 
