@@ -3,6 +3,7 @@ package site.gnu_gongji.GnuGongji.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.awspring.cloud.sqs.operations.SendResult;
 import io.awspring.cloud.sqs.operations.SqsTemplate;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +19,7 @@ import site.gnu_gongji.GnuGongji.dto.ScrapNotification;
 @Service
 public class AwsSqsSender implements NotificationSender {
 
+    @Getter
     @Value("${cloud.aws.sqs.queue.name}")
     private String simpleServiceQueueName;
 
