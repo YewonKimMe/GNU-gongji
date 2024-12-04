@@ -50,7 +50,7 @@ public class AwsSqsConfig {
     }
 
     @Bean
-    public SqsMessageListenerContainerFactory<Object> sqsMessageListenerContainerFactory() {
+    public SqsMessageListenerContainerFactory<Object> defaultSqsListenerContainerFactory() {
         return SqsMessageListenerContainerFactory.builder()
                 .configure(sqsContainerOptionsBuilder ->
                         sqsContainerOptionsBuilder
