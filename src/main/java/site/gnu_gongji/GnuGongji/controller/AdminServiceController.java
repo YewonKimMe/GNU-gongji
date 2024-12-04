@@ -15,15 +15,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import site.gnu_gongji.GnuGongji.dto.FcmNotificationDto;
+import site.gnu_gongji.GnuGongji.dto.ScrapNotification;
 import site.gnu_gongji.GnuGongji.dto.response.ResultAndMessage;
 import site.gnu_gongji.GnuGongji.dto.response.SuccessResultAndMessage;
 import site.gnu_gongji.GnuGongji.entity.Department;
-import site.gnu_gongji.GnuGongji.service.DepartmentService;
-import site.gnu_gongji.GnuGongji.service.FcmService;
-import site.gnu_gongji.GnuGongji.service.NoticeExcelParser;
-import site.gnu_gongji.GnuGongji.service.SlackService;
+import site.gnu_gongji.GnuGongji.service.*;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,6 +38,8 @@ public class AdminServiceController {
     private final FcmService fcmService;
 
     private final SlackService slackService;
+
+    private final AwsSqsSender awsSqsSender;
 
     @Operation(summary = "부서 엑셀 파일 등록", description = "부서 엑셀 파일을 등록하는 API")
     @PostMapping(value = "/excel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -78,10 +77,19 @@ public class AdminServiceController {
     @PostMapping("/slack-message-send")
     public ResponseEntity<ResultAndMessage> sendSlackMessage(@RequestBody SlackMessageDto messageDto) {
 
-        slackService.sendSimpleTextMessage(messageDto.text);
+        slackService.sendSimpleTextMessage(messageDto.text, messageDto.text, true);
 
         return ResponseEntity.ok()
                 .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), "슬랙 채널로 메세지 발송 완료"));
+    }
+
+    @PostMapping("/sqs-test")
+    public ResponseEntity<ResultAndMessage> sendToSqs(@RequestBody ScrapNotification scrapNotification) {
+
+        awsSqsSender.sendScrapNotification(scrapNotification);
+
+        return ResponseEntity.ok()
+                .body(new SuccessResultAndMessage<>(HttpStatus.OK.getReasonPhrase(), "SQS 메세지 발송 완료"));
     }
 
     @Getter
