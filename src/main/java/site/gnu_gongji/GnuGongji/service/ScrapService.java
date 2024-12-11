@@ -155,6 +155,7 @@ public class ScrapService {
                                 .title(title)
                                 .date(date)
                                 .noticeLink(formattedNoticeLinkUrl)
+                                .uuid(UUID.randomUUID().toString())
                                 .build();
 
                         // sqs check, sqs가 정상 상태라면 scrapResultDto 에 scrapResult 가 들어가지 않음
