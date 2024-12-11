@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class AwsSqsListener {
 
-    @SqsListener(value = "${cloud.aws.sqs.queue.name}")
+    //@SqsListener(value = "${cloud.aws.sqs.queue.name}")
     public void listen(String message) {
 
         log.info("SQS poll message: {}", message);
