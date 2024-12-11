@@ -2,10 +2,14 @@ package site.gnu_gongji.GnuGongji.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.gnu_gongji.GnuGongji.dto.DepartmentDto;
+import site.gnu_gongji.GnuGongji.entity.CollectedNotifications;
 import site.gnu_gongji.GnuGongji.entity.Department;
+import site.gnu_gongji.GnuGongji.repository.CollectedNotificationsRepository;
 import site.gnu_gongji.GnuGongji.repository.DepartmentRepository;
 import site.gnu_gongji.GnuGongji.enums.RedisConst;
 
@@ -20,6 +24,8 @@ public class DepartmentService {
     private final DepartmentRepository departmentRepository;
 
     private final RedisService redisService;
+
+    private final CollectedNotificationsRepository collectedNotificationsRepository;
 
     public void saveDepartmentComb(Department department) {
 
@@ -53,5 +59,12 @@ public class DepartmentService {
 
     public boolean checkDepartmentExistByDId(Long departmentId) {
         return departmentRepository.checkDepartmentByDId(departmentId);
+    }
+
+    public Page<CollectedNotifications> getAllCollectedNotifications(int pageNumber, int pageSize, Long departmentId, String query) {
+
+        PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
+
+        return collectedNotificationsRepository.getCollectedNotifications(pageRequest, departmentId, query);
     }
 }
