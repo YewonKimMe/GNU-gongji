@@ -35,6 +35,9 @@ dependencies {
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+	implementation 'org.springframework.boot:spring-boot-starter-hateoas'
 	implementation 'com.google.firebase:firebase-admin:9.2.0'           // Google Firebase Admin
 	implementation 'com.fasterxml.jackson.core:jackson-core:2.16.1'     // Jackson Data Bind
 	runtimeOnly 'com.mysql:mysql-connector-j'
