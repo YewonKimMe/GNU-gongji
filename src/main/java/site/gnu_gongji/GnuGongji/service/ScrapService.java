@@ -12,12 +12,15 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.gnu_gongji.GnuGongji.dto.LastNttsnDto;
 import site.gnu_gongji.GnuGongji.dto.ScrapNotification;
 import site.gnu_gongji.GnuGongji.dto.ScrapResult;
 import site.gnu_gongji.GnuGongji.dto.ScrapResultDto;
 import site.gnu_gongji.GnuGongji.entity.Department;
 import site.gnu_gongji.GnuGongji.entity.DepartmentNoticeInfo;
 import site.gnu_gongji.GnuGongji.enums.Topic;
+import site.gnu_gongji.GnuGongji.repository.CollectedNotificationsJDBCRepository;
+import site.gnu_gongji.GnuGongji.repository.DepartmentNoticeInfoJDBCRepository;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -35,6 +38,10 @@ public class ScrapService {
     private final DepartmentService departmentService;
 
     private final NotificationService notificationService;
+
+    private final DepartmentNoticeInfoJDBCRepository departmentNoticeInfoJDBCRepository;
+
+    private final CollectedNotificationsJDBCRepository collectedNotificationsJDBCRepository;
 
     private final SlackService slackService;
 
@@ -60,6 +67,9 @@ public class ScrapService {
 
         // 모든 Department 와 DepartmentNoticeInfo (세부 정보) 획득
         List<Department> allDptList = departmentService.getAllDepartmentNoticeInfo();
+
+        // lastNttSn 상태저장 List
+        List<LastNttsnDto> lastNttsnDtoList = new ArrayList<>();
 
         // 모든 Department 에 대해서 반복작업 수행
         for (Department department : allDptList) {
@@ -163,7 +173,15 @@ public class ScrapService {
                     //nttSnList.sort(Collections.reverseOrder()); // lastNttSn 저장
                     if (!nttSnSet.isEmpty()) { // 공지사항이 스크랩된 경우 == Set 이 비어있지 않은 경우
                         log.debug(nttSnSet.toString());
-                        departmentNoticeInfo.setLastNttSn(nttSnSet.first());
+
+                        LastNttsnDto lastNttsnDto = LastNttsnDto.builder()
+                                .id(departmentNoticeInfo.getNoticeInfoId())
+                                .nttSn(nttSnSet.first())
+                                .build();
+
+                        // nttSnSet.first() + dto 생성, 리스트에 추가
+                        lastNttsnDtoList.add(lastNttsnDto);
+                        //departmentNoticeInfo.setLastNttSn(nttSnSet.first());
                     }
                 } catch (IOException e) {
                     log.error("[SCRAP IOException] department={}, dept_url={}", department.getDepartmentKo(), formattedNoticeUrl);
@@ -190,6 +208,16 @@ public class ScrapService {
         if (!resultList.isEmpty()) {
             notificationService
                     .handleNotificationProcessWithTopic(resultList);
+        }
+
+        // batch update
+        if (!lastNttsnDtoList.isEmpty()) {
+            departmentNoticeInfoJDBCRepository.batchUpdateDeptInfo(lastNttsnDtoList);
+        }
+
+        // batch insert
+        if (!resultList.isEmpty()) {
+            collectedNotificationsJDBCRepository.batchInsert(resultList);
         }
 
         // SLACK 으로 결과 전송
@@ -230,6 +258,7 @@ public class ScrapService {
 
     public void setSqsStatus(boolean status) {
         this.sqsStatus = status;
-        slackService.sendSimpleTextMessage("AWS SQS-" + awsSqsSender.getSimpleServiceQueueName() + " 상태가 업데이트 되었습니다. \n현재 SQS status flag=" + this.sqsStatus + "\n알림 작업 서버 상태: " + (this.sqsStatus ? "이용 가능" : "이용 불가"), "알림 작업 서버 활성화 신호 수신", this.sqsStatus);
+        log.info("[Status Update] sqsStatus={}", sqsStatus);
+        slackService.sendSimpleTextMessage("AWS SQS-" + awsSqsSender.getSimpleServiceQueueName() + " 상태가 업데이트 되었습니다. \n현재 SQS-AlertServer status flag=" + this.sqsStatus + "\n알림 작업 서버 상태: " + (this.sqsStatus ? "이용 가능" : "이용 불가"), "알림 작업 서버 신호 수신", this.sqsStatus);
     }
 }
