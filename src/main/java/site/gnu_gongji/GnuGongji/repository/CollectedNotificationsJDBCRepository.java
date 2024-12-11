@@ -12,8 +12,10 @@ import site.gnu_gongji.GnuGongji.tool.UUIDConverter;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
@@ -26,11 +28,12 @@ public class CollectedNotificationsJDBCRepository {
     public void batchInsert(List<ScrapResultDto> scrapResultDtoList) {
 
         List<ScrapResult> scrapResults = new ArrayList<>();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
 
         for (ScrapResultDto scrapResultDto : scrapResultDtoList) {
-            Collections.reverse(scrapResultDto.getScrapResultList());
             scrapResults.addAll(scrapResultDto.getScrapResultList());
         }
+        scrapResults.sort(Comparator.comparing(scrapResult -> LocalDate.parse(scrapResult.getDate(), formatter)));
 
         String sql = "INSERT INTO collected_notification (department_id, department_name, noti_title, date_time, link, created_time, uuid) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
