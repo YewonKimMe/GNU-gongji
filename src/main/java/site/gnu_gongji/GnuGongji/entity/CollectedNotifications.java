@@ -29,6 +29,8 @@ public class CollectedNotifications {
     @Column(name = "created_time")
     private Timestamp createTime;
 
+    private byte[] uuid;
+
     @Builder
     public CollectedNotifications(Long id, Long departmentId, String departmentName, String notiTitle, String dateTime, String link) {
         this.id = id;
