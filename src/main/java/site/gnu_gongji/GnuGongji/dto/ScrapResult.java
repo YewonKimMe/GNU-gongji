@@ -20,4 +20,6 @@ public class ScrapResult {
     private String date;
 
     private String noticeLink;
+
+    private String uuid;
 }
