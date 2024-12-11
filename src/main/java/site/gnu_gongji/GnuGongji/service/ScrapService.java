@@ -204,13 +204,6 @@ public class ScrapService {
 
         }
 
-        // 알림 발송 함수 호출
-        // 무조건 호출되는게 아니라 스크랩된 것이 있으면 호출
-        if (!resultList.isEmpty()) {
-            notificationService
-                    .handleNotificationProcessWithTopic(resultList);
-        }
-
         // batch update
         if (!lastNttsnDtoList.isEmpty()) {
             departmentNoticeInfoJDBCRepository.batchUpdateDeptInfo(lastNttsnDtoList);
@@ -219,6 +212,13 @@ public class ScrapService {
         // batch insert
         if (!resultList.isEmpty()) {
             collectedNotificationsJDBCRepository.batchInsert(resultList);
+        }
+
+        // 알림 발송 함수 호출
+        // 무조건 호출되는게 아니라 스크랩된 것이 있으면 호출
+        if (!resultList.isEmpty()) {
+            notificationService
+                    .handleNotificationProcessWithTopic(resultList);
         }
 
         // SLACK 으로 결과 전송
