@@ -50,7 +50,6 @@ public class CollectedNotificationsRepository {
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
-        log.debug("find.get(3).title={}, UUID={}",find.get(3).getNotiTitle(), UUIDConverter.convertBinary16ToUUID(find.get(3).getUuid()).toString());
 
         JPAQuery<Long> countQuery = queryFactory.select(qCollectedNotifications.count())
                 .from(qCollectedNotifications)
