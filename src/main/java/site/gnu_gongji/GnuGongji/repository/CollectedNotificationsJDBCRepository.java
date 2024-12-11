@@ -7,11 +7,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import site.gnu_gongji.GnuGongji.dto.ScrapResult;
 import site.gnu_gongji.GnuGongji.dto.ScrapResultDto;
+import site.gnu_gongji.GnuGongji.tool.UUIDConverter;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -26,10 +28,11 @@ public class CollectedNotificationsJDBCRepository {
         List<ScrapResult> scrapResults = new ArrayList<>();
 
         for (ScrapResultDto scrapResultDto : scrapResultDtoList) {
+            Collections.reverse(scrapResultDto.getScrapResultList());
             scrapResults.addAll(scrapResultDto.getScrapResultList());
         }
 
-        String sql = "INSERT INTO collected_notification (department_id, department_name, noti_title, date_time, link, created_time) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO collected_notification (department_id, department_name, noti_title, date_time, link, created_time, uuid) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
 
@@ -47,6 +50,7 @@ public class CollectedNotificationsJDBCRepository {
                 ps.setString(4, find.getDate());
                 ps.setString(5, find.getNoticeLink());
                 ps.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
+                ps.setBytes(7, UUIDConverter.convertUuidStringToBinary16(find.getUuid()));
             }
 
             @Override
