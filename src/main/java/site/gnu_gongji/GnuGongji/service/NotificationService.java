@@ -95,10 +95,11 @@ public class NotificationService {
                 String dept_topic = Topic.DEPT_TOPIC_PATH.getPath() + departmentId;
                 /// FCM Topic 기반 알림 발송 함수 호출 ///
                 fcmService.sendMessageByTopic(scrapResult.getDepartmentName(),
-                        scrapResult.getTitle() + " \n(" + scrapResult.getDate() + ")",
+                        scrapResult.getTitle(),
                         scrapResult.getNoticeLink(),
                         scrapResult.getDate(),
-                        dept_topic);
+                        dept_topic,
+                        scrapResult.getUuid());
                 sendCount += 1;
             }
         }
