@@ -138,6 +138,17 @@ public class FcmService {
                 .putData("link", link)
                 .putData("notificationDate", notificationDate)
                 .putData("uuid", uuid)
+                // Android용 높은 우선순위 설정
+                .setAndroidConfig(AndroidConfig.builder()
+                        .setPriority(AndroidConfig.Priority.HIGH)
+                        .build())
+                // iOS용 content-available 설정
+                .setApnsConfig(ApnsConfig.builder()
+                        .putHeader("apns-priority", "10")
+                        .setAps(Aps.builder()
+                                .setContentAvailable(true)
+                                .build())
+                        .build())
                 .build();
         try {
             String res = FirebaseMessaging.getInstance().send(message);
