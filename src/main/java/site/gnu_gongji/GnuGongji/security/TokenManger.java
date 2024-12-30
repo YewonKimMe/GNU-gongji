@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,7 +47,7 @@ public class TokenManger {
     @Value("${mycustom.jwt.secret}")
     private String jwtSecret;
 
-    public boolean validateJwtToken(String token, TokenType tokenType) {
+    public boolean validateJwtToken(String token, TokenType tokenType, HttpServletRequest request, HttpServletResponse response) {
         try {
             // 기존 비밀키 생성
             SecretKey existingSecretKey = getSecretKey(jwtSecret);
@@ -56,6 +58,14 @@ public class TokenManger {
                     .build()
                     .parseSignedClaims(token);
 
+            // 여기서 만약 refreshToken 이 올바르다면, jwt 토큰을 하나 생성해서 넣어줘야겠는데
+            // TODO: RefreshToken 일 경우 -> 새로운 JWT 토큰을 생성해서 클라이언트로 보내주기
+            if (tokenType == TokenType.REFRESH) {
+
+                // TODO getClaim 으로 refreshToken 으로부터 사용자 정보를 얻어 jwt 토큰을 생성
+
+                //response.setHeader("Authorization", "Bearer " + NEWTOKEN);
+            }
             return true;
 
         } catch (UnsupportedJwtException | MalformedJwtException exception) {
@@ -68,7 +78,7 @@ public class TokenManger {
 
             // jwt 만료 상황
             if (tokenType == TokenType.ACCESS) {
-                return checkRefreshToken(token);
+                return checkRefreshToken(token, request, response);
             } else if (tokenType == TokenType.REFRESH) {
 
                 Map<String, Object> claim = getClaim(token);
@@ -101,7 +111,7 @@ public class TokenManger {
         return false; // SecurityContext.clearContext() -> Exception(501 response)
     }
 
-    private boolean checkRefreshToken(String invalidAccessJwt) {
+    private boolean checkRefreshToken(String invalidAccessJwt, HttpServletRequest request, HttpServletResponse response) {
 
         Map<String, Object> claim = getClaim(invalidAccessJwt);
 
@@ -121,7 +131,7 @@ public class TokenManger {
 
         String refreshToken = user.getRefreshToken();
 
-        return validateJwtToken(refreshToken, TokenType.REFRESH);
+        return validateJwtToken(refreshToken, TokenType.REFRESH, request, response);
     }
 
     private String createRefreshToken(TokenType tokenType, TokenDurationTime tokenDurationTime, String subject, String provider, String oauth2Id, String username, String authorities) {
