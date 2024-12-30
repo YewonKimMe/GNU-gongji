@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import site.gnu_gongji.GnuGongji.enums.ProcessCode;
 
 import java.net.URI;
 
@@ -19,11 +20,11 @@ public class AuthController {
     public ResponseEntity<Void> kakaoLogoutCallback(@RequestParam("redirectUri") String redirectUri) {
 
         log.debug("redirectUri: {}", redirectUri);
-
+        String newUri = redirectUri + "?process=" + ProcessCode.SUCCESS.getCode();
         // 딥링크 URL로 리다이렉트
         return ResponseEntity
                 .status(HttpStatus.FOUND)
-                .location(URI.create(redirectUri))
+                .location(URI.create(newUri))
                 .build();
     }
 }
