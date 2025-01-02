@@ -158,16 +158,13 @@ public class ScrapService {
                                 .uuid(UUID.randomUUID().toString())
                                 .build();
 
-                        // sqs check, sqs가 정상 상태라면 scrapResultDto 에 scrapResult 가 들어가지 않음
-                        if (sqsStatus) {
-                            // SQS 에 전송 시도
-                            ScrapNotification sqsMessage = ScrapNotification.of(scrapResult, Topic.DEPT_TOPIC_PATH.getPath() + department.getDepartmentId());
-                            boolean result = awsSqsSender.sendScrapNotification(sqsMessage);
+                        // SQS에 전송
+                        ScrapNotification sqsMessage = ScrapNotification.of(scrapResult, Topic.DEPT_TOPIC_PATH.getPath() + department.getDepartmentId());
+                        boolean result = awsSqsSender.sendScrapNotification(sqsMessage);
 
+                        if (!result) {
                             // result == false -> 메세지 전송 실패, 로컬 메세지 전송 함수를 이용하기 위해 기존 리스트에 추가
-                            if (!result) scrapResultDto.getScrapResultList().add(scrapResult);
-                        } else {
-                            // else
+                            // result == true 라면, scrapResultList 에 scrapResult 가 저장되지 않음 -> handleNotification 호출 X
                             scrapResultDto.getScrapResultList().add(scrapResult);
                         }
                     }
