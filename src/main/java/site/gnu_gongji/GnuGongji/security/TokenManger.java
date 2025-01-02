@@ -49,6 +49,7 @@ public class TokenManger {
 
     public boolean validateJwtToken(String token, TokenType tokenType, HttpServletRequest request, HttpServletResponse response) {
         try {
+            log.debug("original jwt token: {}", getClaim(token));
             // 기존 비밀키 생성
             SecretKey existingSecretKey = getSecretKey(jwtSecret);
 
@@ -59,12 +60,33 @@ public class TokenManger {
                     .parseSignedClaims(token);
 
             // 여기서 만약 refreshToken 이 올바르다면, jwt 토큰을 하나 생성해서 넣어줘야겠는데
-            // TODO: RefreshToken 일 경우 -> 새로운 JWT 토큰을 생성해서 클라이언트로 보내주기
+            // RefreshToken 일 경우 -> 새로운 JWT 토큰을 생성해서 클라이언트로 보내주기
             if (tokenType == TokenType.REFRESH) {
+                log.debug("refresh token is valid, set new token to client");
 
-                // TODO getClaim 으로 refreshToken 으로부터 사용자 정보를 얻어 jwt 토큰을 생성
+                // getClaim 으로 refreshToken 으로부터 사용자 정보를 얻어 jwt 토큰을 생성
+                Map<String, Object> claim = getClaim(token);
 
-                //response.setHeader("Authorization", "Bearer " + NEWTOKEN);
+                if (claim == null) return false;
+
+                log.debug(claim.toString());
+
+                String provider = String.valueOf(claim.get(PROVIDER.getClaimKey()));
+                String oauth2Id = String.valueOf(claim.get(OAUTH2_ID.getClaimKey()));
+                String username = String.valueOf(claim.get(USERNAME.getClaimKey()));
+                String authorities = String.valueOf(claim.get(AUTHORITIES.getClaimKey()));
+
+                // 토큰 재생성, 사용자 정보에 저장
+                String newJwtToken = createNewToken(
+                        TokenType.ACCESS,
+                        TokenDurationTime.ACCESS,
+                        (String) claim.get(SUBJECT.getClaimKey()),
+                        provider,
+                        oauth2Id,
+                        username,
+                        authorities);
+
+                response.setHeader("Authorization", newJwtToken);
             }
             return true;
 
@@ -91,7 +113,7 @@ public class TokenManger {
                 String authorities = String.valueOf(claim.get(AUTHORITIES.getClaimKey()));
 
                 // 토큰 재생성, 사용자 정보에 저장
-                String newRefreshToken = createRefreshToken(
+                String newRefreshToken = createNewToken(
                         TokenType.REFRESH,
                         TokenDurationTime.REFRESH,
                         (String) claim.get(SUBJECT.getClaimKey()),
@@ -117,6 +139,7 @@ public class TokenManger {
 
         if (claim == null) return false;
 
+        log.debug("refreshToken claim: {}", claim);
         String oauth2Id = String.valueOf(claim.get(OAUTH2_ID.getClaimKey()));
         String oauth2Provider = String.valueOf(claim.get(PROVIDER.getClaimKey()));
 
@@ -131,10 +154,19 @@ public class TokenManger {
 
         String refreshToken = user.getRefreshToken();
 
+        log.debug("refreshToken Claim: {}", getClaim(refreshToken));
+
+        //
+        /**
+         * accessToken.role == refreshToken.role 을 일치시켜야 함.
+         * 만약 accessToken.role == ROLE_ADMIN, refreshToken.role == ROLE.USER 인 경우,
+         * 강제로 권한을 뺏기는 문제 발생
+         * */
+
         return validateJwtToken(refreshToken, TokenType.REFRESH, request, response);
     }
 
-    private String createRefreshToken(TokenType tokenType, TokenDurationTime tokenDurationTime, String subject, String provider, String oauth2Id, String username, String authorities) {
+    private String createNewToken(TokenType tokenType, TokenDurationTime tokenDurationTime, String subject, String provider, String oauth2Id, String username, String authorities) {
         SecretKey secretKey = getSecretKey(jwtSecret);
 
         Instant expirationTime = Instant.now().plus(Duration.ofHours(tokenDurationTime.getTime()));
@@ -167,6 +199,7 @@ public class TokenManger {
             // JSON 파싱을 위해 Jackson ObjectMapper를 사용
             ObjectMapper objectMapper = new ObjectMapper();
 
+            log.debug("parse: {}", objectMapper.readValue(payload, Map.class));
             return objectMapper.readValue(payload, Map.class);
         } catch (Exception e) {
             e.printStackTrace();
