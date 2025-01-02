@@ -81,7 +81,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/v1/admin/**", "/api/v1/test/**", "/actuator/**").hasRole("ADMIN")
                                 .requestMatchers("/api/v1/info/**").hasRole("USER")
                                 .requestMatchers("/api/v1/firebase/**").hasRole("USER")
-                                .requestMatchers("/oauth2/**", "/login/**", "/api/v1/aws/**").permitAll()
+                                .requestMatchers("/oauth2/**", "/login/**", "/api/v1/aws/**", "/api/v1/auth/oauth2/logout/callback/**").permitAll()
                                 .anyRequest().denyAll()
                 )
                 .oauth2Login(configurer -> configurer.
