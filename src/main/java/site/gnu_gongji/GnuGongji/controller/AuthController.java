@@ -13,9 +13,15 @@ import java.net.URI;
 
 @Slf4j
 @RestController
+/**
+ * 모바일 callback url, remoteConfig 에 등록되어 있으므로 url 순서 및 내용 수정 X
+ * */
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
+    /**
+     * 모바일 callback url, remoteConfig 에 등록되어 있으므로 url 순서 및 내용 수정 X
+     * */
     @GetMapping("/oauth2/logout/callback/kakao")
     public ResponseEntity<Void> kakaoLogoutCallback(@RequestParam("redirectUri") String redirectUri) {
 
