@@ -35,7 +35,7 @@ public class JwtValidatorFilter extends OncePerRequestFilter {
             return;
         }
 
-        if (tokenManger.validateJwtToken(jwtToken, TokenType.ACCESS)) { // JWT 검증
+        if (tokenManger.validateJwtToken(jwtToken, TokenType.ACCESS, request, response)) { // JWT 검증
             log.debug("JWT Valid={}", jwtToken);
             Authentication authentication = tokenManger.getAuth(jwtToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
