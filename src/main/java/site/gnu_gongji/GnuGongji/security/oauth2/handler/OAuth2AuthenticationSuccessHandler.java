@@ -100,8 +100,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         log.info("email={}", oAuth2UserPrincipal.getUserInfo().getEmail());
 
         // 토큰 생성, ROLE 추가
-        String accessToken = tokenManger.createJwtToken(authentication, oAuth2UserPrincipal, TokenType.ACCESS, TokenDurationTime.ACCESS);
-        String refreshToken = tokenManger.createJwtToken(authentication, oAuth2UserPrincipal, TokenType.REFRESH, TokenDurationTime.REFRESH);
+        String accessToken = tokenManger.createJwtTokenToAuthInfo(authentication, oAuth2UserPrincipal, TokenType.ACCESS, TokenDurationTime.ACCESS);
+        String refreshToken = tokenManger.createJwtTokenToAuthInfo(authentication, oAuth2UserPrincipal, TokenType.REFRESH, TokenDurationTime.REFRESH);
 
 
         // Duplication check
