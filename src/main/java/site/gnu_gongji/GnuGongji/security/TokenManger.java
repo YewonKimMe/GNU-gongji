@@ -208,7 +208,7 @@ public class TokenManger {
         }
     }
 
-    public String createJwtToken(Authentication authentication, OAuth2User oAuth2User, TokenType tokenType, TokenDurationTime tokenDurationTime) {
+    public String createJwtTokenToAuthInfo(Authentication authentication, OAuth2User oAuth2User, TokenType tokenType, TokenDurationTime tokenDurationTime) {
 
         OAuth2AuthenticationToken oAuth2AuthenticationToken = null;
 
@@ -239,9 +239,16 @@ public class TokenManger {
         if (oAuth2UserPrincipal == null || oAuth2AuthenticationToken == null) {
             throw new BadCredentialsException("OAuth2 인증 정보가 없습니다.");
         }
+        log.debug("subject={}", authentication.getName());
+        log.debug("provider: {}", oAuth2AuthenticationToken.getAuthorizedClientRegistrationId());
+        log.debug("oauth2id={}", oAuth2UserPrincipal.getUserInfo().getId());
+        log.debug("username={}", oAuth2UserPrincipal.getUserInfo().getId());
+        log.debug("authorities={}", oAuth2AuthenticationToken.getAuthorizedClientRegistrationId());
+        log.debug("authentication.getName(): {}", authentication.getName());
+
         return Jwts.builder()
                 .issuer(ISSUER.getClaimKey())
-                .subject(authentication.getName())
+                .subject("GNU_GONGJI_AUTHORIZATION_TOKEN")
                 .expiration(Date.from(expirationTime))
                 .claim(TYPE.getClaimKey(), tokenType.getTokenName())
                 .claim(PROVIDER.getClaimKey(), oAuth2AuthenticationToken.getAuthorizedClientRegistrationId())
