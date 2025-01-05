@@ -5,8 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.Timestamp;
 
 @Entity
 @Getter
@@ -27,8 +26,11 @@ public class UserSub {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Column(name = "departmentId")
+    @Column(name = "department_id")
     private Long departmentId;
+
+    @Column(name = "create_time")
+    private Timestamp startAt;
 
 //    @OneToMany(mappedBy = "userSub")
 //    private List<UserSubDepartment> userSubDepartments = new ArrayList<>();
