@@ -19,6 +19,8 @@ public class UserInfoDto {
 
     private String createDate;
 
+    private Integer subLimit;
+
     private boolean isPushMessagingAgreed;
 
 }
