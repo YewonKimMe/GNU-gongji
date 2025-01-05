@@ -18,6 +18,7 @@ import site.gnu_gongji.GnuGongji.enums.Topic;
 import site.gnu_gongji.GnuGongji.tool.AESUtil;
 import site.gnu_gongji.GnuGongji.tool.UUIDConverter;
 
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -87,6 +88,7 @@ public class UserFeatureService {
         UserSub userSub = new UserSub();
 
         userSub.setDepartmentId(departmentId);
+        userSub.setStartAt(new Timestamp(System.currentTimeMillis()));
         userSub.setUser(findUser);
 
         findUser.getSubList().add(userSub);
@@ -146,7 +148,7 @@ public class UserFeatureService {
         }
     }
 
-    public List<DepartmentDto> getUserSub(String oauth2Id) {
+    public List<UserSubInfoDto> getUserSub(String oauth2Id) {
         return userFeatureRepository.findDepartmentsByUserOauth2Id(oauth2Id);
     }
 
@@ -185,6 +187,7 @@ public class UserFeatureService {
                 .email(findUser.getUserEmail())
                 .oauth2Provider(findUser.getOauth2Provider())
                 .createDate(formattedDate)
+                .subLimit(findUser.getSubLimit())
                 .isPushMessagingAgreed(findUser.getFcmToken() != null)
                 .build();
     }
