@@ -103,7 +103,7 @@ public class UserController {
 
         log.debug("[USER SUB] userId={}", authentication.getName());
 
-        List<DepartmentDto> userSub = userFeatureService.getUserSub(authentication.getName());
+        List<UserSubInfoDto> userSub = userFeatureService.getUserSub(authentication.getName());
 
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(3, TimeUnit.SECONDS))
