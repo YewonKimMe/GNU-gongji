@@ -8,14 +8,16 @@ spring:
       cron: ${CRON_EXPRESSION}
   # DATASOURCE SETTING
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:oracle:thin:@${ORACLE_ATP_ENDPOINT}
+    username: ${ORACLE_ATP_USERNAME}
+    password: ${ORACLE_ATP_PASSWORD}
+    driver-class-name: oracle.jdbc.OracleDriver
   data:
     redis:
       host: ${REDIS_HOST}
       port: 6379
   jpa:
+    database-platform: org.hibernate.dialect.OracleDialect
     show-sql: false # SQL 쿼리 출력 비활성화
     properties:
       hibernate:
